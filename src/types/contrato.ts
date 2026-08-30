@@ -6,8 +6,20 @@
  * resultado da classificação/extração (GET /documentos/:id).
  */
 
-/** Tipos de documento que o modelo do fornecedor sabe classificar. */
-export type TipoDocumento = 'identidade'
+/**
+ * Tipo do documento classificado pelo fornecedor. A lista é aberta de propósito
+ * (fato f: os documentos e os campos mudam); estes são os valores conhecidos hoje.
+ * O conjunto de chaves em `campos` depende do tipo — identidade tem CPF e órgão
+ * emissor, laudo tem médico e CRM, contrato tem partes e vigência, etc.
+ */
+export type TipoDocumento =
+  | 'identidade'
+  | 'contracheque'
+  | 'carteira_trabalho'
+  | 'laudo'
+  | 'procuracao'
+  | 'contrato'
+  | (string & {})
 
 /** Um campo extraído, sempre com o grau de confiança do modelo. */
 export interface CampoExtraido {

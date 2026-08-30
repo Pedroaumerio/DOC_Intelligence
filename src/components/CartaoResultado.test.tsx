@@ -11,7 +11,7 @@ beforeEach(() => {
     latenciaMaxMs: 10,
     probFalha: 0,
     probQuedaCampo: 0,
-    indiceIdentidade: 0, // fixa na identidade do exemplo do enunciado
+    indiceDocumento: 0, // fixa no exemplo do enunciado (identidade, 5 campos)
   })
 })
 

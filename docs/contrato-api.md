@@ -66,8 +66,20 @@ O poll pausa quando a aba perde o foco (fato e).
 }
 ```
 
-Cada campo traz sempre um `confianca` (0–1). O conjunto de chaves em `campos`
-depende do `tipo_documento` e pode mudar sem alteração de front (fato f).
+Cada campo traz sempre um `confianca` (0–1). **O conjunto de chaves em `campos`
+depende do `tipo_documento`** e pode mudar sem alteração de front (fato f) — a
+tela renderiza o que vier. Exemplos:
+
+| `tipo_documento` | campos |
+|---|---|
+| `identidade` | `nome`, `filiacao`, `data_nascimento`, `numero`, `orgao_emissor` (às vezes `cpf`) |
+| `contracheque` | `nome`, `cpf`, `matricula`, `cargo`, `empregador`, `competencia`, `salario_bruto`, `salario_liquido` |
+| `carteira_trabalho` | `nome`, `cpf`, `data_nascimento`, `filiacao`, `numero_ctps`, `serie`, `pis` |
+| `laudo` | `paciente`, `data_exame`, `tipo_exame`, `medico_responsavel`, `crm`, `conclusao` (sem CPF) |
+| `procuracao` | `outorgante`, `outorgado`, `finalidade`, `tabeliao`, `data_lavratura`, `validade` |
+| `contrato` | `contratante`, `contratada`, `objeto`, `valor`, `vigencia_inicio`, `vigencia_fim`, `data_assinatura` |
+
+Datas vêm em ISO (`aaaa-mm-dd`); o front exibe `dd/mm/aaaa`.
 
 **Falhou**
 
@@ -96,13 +108,14 @@ dados são fictícios. A classificação/extração é a função em
 - responde com latência aleatória (5–18 s por padrão no exercício; produção
   observa até 40 s);
 - falha de forma intermitente (~12% dos envios) para exercitar o estado `falhou`;
-- devolve uma de ~5 identidades fictícias (a #0 é o exemplo do enunciado,
-  "João da Silva"), estável por documento;
+- devolve um de vários documentos fictícios — identidade, contracheque, carteira
+  de trabalho, laudo, procuração, contrato — cada um com o seu conjunto de campos
+  (o #0 é o exemplo do enunciado, "João da Silva"). Estável por documento;
 - varia a confiança de cada campo e às vezes derruba um campo de propósito, para
   que a próxima fatia (conferência humana) tenha o caso de baixa confiança.
 
-Os testes zeram latência e aleatoriedade e fixam a identidade via
-`configurarDuble()`.
+Os testes zeram latência e aleatoriedade e fixam o documento via
+`configurarDuble({ indiceDocumento })`.
 
 ---
 
