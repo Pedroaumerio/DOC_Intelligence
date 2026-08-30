@@ -3,6 +3,10 @@ import { Logo } from '../components/Logo'
 import { useSessionDocumentos } from '../session/SessionDocumentos'
 import estilos from './Layout.module.css'
 
+function classe({ isActive }: { isActive: boolean }) {
+  return isActive ? `${estilos.link} ${estilos.ativo}` : estilos.link
+}
+
 export function Layout() {
   const { documentos } = useSessionDocumentos()
 
@@ -11,24 +15,17 @@ export function Layout() {
       <header className={estilos.cabecalho}>
         <Logo />
         <nav className={estilos.nav}>
-          <NavLink
-            to="/adicionar"
-            className={({ isActive }) =>
-              isActive ? `${estilos.link} ${estilos.ativo}` : estilos.link
-            }
-          >
+          <NavLink to="/adicionar" className={classe}>
             Adicionar documento
           </NavLink>
-          <NavLink
-            to="/resultado"
-            className={({ isActive }) =>
-              isActive ? `${estilos.link} ${estilos.ativo}` : estilos.link
-            }
-          >
+          <NavLink to="/resultado" className={classe}>
             Resultados
             {documentos.length > 0 && (
               <span className={estilos.contador}>{documentos.length}</span>
             )}
+          </NavLink>
+          <NavLink to="/processados" className={classe}>
+            Processados
           </NavLink>
         </nav>
       </header>

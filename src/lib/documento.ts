@@ -1,4 +1,4 @@
-import type { TipoDocumento } from '../types/contrato'
+import type { StatusDocumento, TipoDocumento } from '../types/contrato'
 
 /** Rótulo legível do tipo de documento classificado pelo fornecedor. */
 export function rotuloTipo(tipo: TipoDocumento | string): string {
@@ -93,3 +93,20 @@ export function rotuloConfianca(nivel: NivelConfianca): string {
 export function percentualConfianca(confianca: number): string {
   return `${Math.round(confianca * 100)}%`
 }
+
+export function rotuloStatus(status: StatusDocumento): string {
+  return {
+    processando: 'Processando',
+    concluido: 'Concluído',
+    aguardando_conferencia: 'Aguardando conferência',
+    falhou: 'Falhou',
+  }[status]
+}
+
+/** Data curta (dd/mm/aaaa) a partir de um ISO. */
+export function dataCurta(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  return d.toLocaleDateString('pt-BR')
+}
+

@@ -5,9 +5,48 @@
 > [`src/mocks/handlers.ts`](../src/mocks/handlers.ts) espelham o que está aqui.
 > Base URL: `/api`.
 
-Escopo implementado: a fatia de **receber o documento e devolver a
-classificação/extração** (ver [`fatia-atual.md`](fatia-atual.md)). Fila de
-conferência, `claim` e busca geral ficam para a próxima fatia.
+Escopo implementado: **receber o documento** (ver [`fatia-atual.md`](fatia-atual.md))
+e **consultar/listar os processados** (ver [`fatia-busca.md`](fatia-busca.md)).
+Fila de conferência e `claim` ficam para a próxima fatia.
+
+---
+
+## `GET /documentos` — lista/busca dos processados
+
+Query params (todos opcionais):
+
+| Param | Padrão | Descrição |
+|---|---|---|
+| `pagina` | `1` | Página 1-based |
+| `tamanho` | `10` | Itens por página (máx. 50) |
+| `q` | — | Texto livre: casa nome do arquivo, titular, tipo e valores dos campos |
+| `status` | — | `concluido` \| `aguardando_conferencia` \| `falhou` \| `processando` |
+
+Ordenado por `recebido_em` decrescente.
+
+```json
+{
+  "itens": [
+    {
+      "id": "doc_...",
+      "nome_original": "WhatsApp Image 2026-08-18 at 09.14.22.jpeg",
+      "nome_sugerido": "procuracao_francisco-aumerio-nogueira-vieira_2026-08-30.jpeg",
+      "tipo_documento": "procuracao",
+      "titular": "Francisco Aumério Nogueira Vieira",
+      "status": "concluido",
+      "recebido_em": "2026-08-30T09:14:22.000Z"
+    }
+  ],
+  "pagina": 1,
+  "tamanho": 10,
+  "total": 24,
+  "tem_proxima": true
+}
+```
+
+`nome_sugerido`, `tipo_documento` e `titular` vêm `null` enquanto processa ou se
+falhou. O **detalhe** de um documento (campos, confiança, conferência) vem de
+`GET /documentos/:id`.
 
 ---
 
@@ -142,9 +181,22 @@ dados são fictícios. A classificação/extração é a função em
 Os testes zeram latência e aleatoriedade e fixam o documento via
 `configurarDuble({ indiceDocumento })`.
 
+### O acervo
+
+Para a lista de processados e a busca terem sobre o que operar, o mock semeia um
+**acervo fictício** ([`src/mocks/acervo.ts`](../src/mocks/acervo.ts)) a cada carga
+da página: ~24 documentos "processados antes", com nomes de arquivo de celular,
+tipos e status variados, datas espalhadas nos últimos dias. É determinístico
+(PRNG com semente fixa — [`src/lib/prng.ts`](../src/lib/prng.ts)). Os envios da
+sessão se somam a ele. Nada é persistido: os campos são PII (fato d), então tudo
+some ao recarregar e o acervo é semeado de novo.
+
 ---
 
 ## Dívida consciente
 
-Com o contrato estável, gerar os tipos a partir de um schema OpenAPI passa a
-valer mais que mantê-los à mão (ver ADR-0001 §4).
+- Com o contrato estável, gerar os tipos a partir de um schema OpenAPI passa a
+  valer mais que mantê-los à mão (ver ADR-0001 §4).
+- A lista de processados não faz *poll*: um documento enviado que ainda está
+  `processando` fica assim na lista até uma nova busca. A visão ao vivo é a de
+  "Resultados"; "Processados" é histórico.

@@ -258,8 +258,10 @@ const CONF_BASE: Record<string, number> = {
 }
 const CONF_PADRAO = 0.85
 
-function variar(base: number): number {
-  const delta = (Math.random() - 0.5) * 0.08
+type Rand = () => number
+
+function variar(base: number, rand: Rand): number {
+  const delta = (rand() - 0.5) * 0.08
   return Math.min(0.995, Math.max(0.05, Number((base + delta).toFixed(2))))
 }
 
@@ -282,29 +284,36 @@ function nomePrincipal(campos: CamposExtraidos): string {
   )
 }
 
-/** Monta o resultado de um documento fictício, com a variação e a queda de campo. */
+/**
+ * Monta o resultado de um documento fictício, com a variação e a queda de campo.
+ * `rand` explícito (ex.: PRNG do acervo) deixa o resultado determinístico;
+ * o padrão é `Math.random`. `indicePool` fixa o modelo do pool.
+ */
 export function classificarDocumento(
   nomeOriginal: string,
   seed = nomeOriginal,
+  rand: Rand = Math.random,
+  indicePool?: number,
 ): {
   tipo_documento: TipoDocumento
   nome_sugerido: string
   campos: CamposExtraidos
 } {
-  const idx = config.indiceDocumento ?? indiceEstavel(seed, POOL.length)
+  const idx =
+    indicePool ?? config.indiceDocumento ?? indiceEstavel(seed, POOL.length)
   const modelo = POOL[idx % POOL.length]!
 
   const campos: CamposExtraidos = {}
   for (const [chave, valor] of Object.entries(modelo.campos)) {
-    campos[chave] = { valor, confianca: variar(CONF_BASE[chave] ?? CONF_PADRAO) }
+    campos[chave] = { valor, confianca: variar(CONF_BASE[chave] ?? CONF_PADRAO, rand) }
   }
 
-  if (Math.random() < config.probQuedaCampo) {
+  if (rand() < config.probQuedaCampo) {
     const chaves = Object.keys(campos)
-    const alvo = chaves[Math.floor(Math.random() * chaves.length)]!
+    const alvo = chaves[Math.floor(rand() * chaves.length)]!
     campos[alvo] = {
       ...campos[alvo]!,
-      confianca: Number((0.2 + Math.random() * 0.3).toFixed(2)),
+      confianca: Number((0.2 + rand() * 0.3).toFixed(2)),
     }
   }
 
@@ -314,6 +323,14 @@ export function classificarDocumento(
     campos,
   }
 }
+
+/** Titular do documento (nome, paciente, contratante…), para a lista de processados. */
+export function titularDoDocumento(campos: CamposExtraidos): string | null {
+  return nomePrincipal(campos) || null
+}
+
+/** Quantos modelos há no pool — usado pelo acervo. */
+export const TAMANHO_POOL = POOL.length
 
 function nomeSugerido(tipo: string, nome: string, nomeOriginal: string): string {
   const base = nome.trim() ? nome : tipo
@@ -343,8 +360,10 @@ export function resultadoLeitura(
   id: string,
   recebidoEm: string,
   nomeOriginal: string,
+  rand: Rand = Math.random,
+  indicePool?: number,
 ): DocumentoConcluido | DocumentoAguardandoConferencia {
-  const lido = classificarDocumento(nomeOriginal, id)
+  const lido = classificarDocumento(nomeOriginal, id, rand, indicePool)
   const camposIncertos = Object.entries(lido.campos)
     .filter(([, c]) => c.confianca < config.limiarConferencia)
     .map(([chave]) => chave)

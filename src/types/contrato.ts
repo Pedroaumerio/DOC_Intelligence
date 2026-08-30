@@ -2,8 +2,8 @@
  * Contrato da API — fonte única de verdade compartilhada entre app, mock e testes
  * (ver docs/adr/0001-stack.md §3 e docs/contrato-api.md).
  *
- * Escopo desta fatia: receber o documento (POST /documentos) e acompanhar o
- * resultado da classificação/extração (GET /documentos/:id).
+ * Cobre: receber o documento (POST /documentos), acompanhar/consultar o resultado
+ * (GET /documentos/:id) e listar/buscar os já processados (GET /documentos).
  */
 
 /**
@@ -93,4 +93,37 @@ export interface RespostaEnvio {
   status: 'processando'
   /** true quando o mesmo hash já tinha sido enviado — não reprocessa (fato c). */
   ja_existia: boolean
+}
+
+// --- GET /documentos — lista/busca dos já processados --------------------
+
+/** Linha da lista de processados. Enxuta: o detalhe vem de GET /documentos/:id. */
+export interface DocumentoResumo {
+  id: string
+  nome_original: string
+  /** Nome padronizado proposto; null enquanto processa ou se falhou. */
+  nome_sugerido: string | null
+  tipo_documento: TipoDocumento | null
+  /** Valor do campo "titular" do documento (nome, paciente, contratante…). */
+  titular: string | null
+  status: StatusDocumento
+  recebido_em: string
+}
+
+/** Filtros aceitos por GET /documentos (querystring). */
+export interface BuscaDocumentos {
+  /** Página 1-based. */
+  pagina?: number
+  tamanho?: number
+  /** Texto livre: casa nome do arquivo, titular, tipo e valores dos campos. */
+  q?: string
+  status?: StatusDocumento
+}
+
+export interface RespostaListaDocumentos {
+  itens: DocumentoResumo[]
+  pagina: number
+  tamanho: number
+  total: number
+  tem_proxima: boolean
 }

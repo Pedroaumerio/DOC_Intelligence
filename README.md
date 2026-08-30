@@ -3,23 +3,27 @@
 Interface de atendimento para triagem, acompanhamento e conferência humana de
 documentos processados por um modelo multimodal de terceiro.
 
-## Fatia implementada
+## Fatias implementadas
 
-Receber o documento e devolver o resultado da classificação/extração — os
-comportamentos 1 e 2 do produto-alvo. Recorte detalhado em
-[`docs/fatia-atual.md`](docs/fatia-atual.md).
+Comportamentos 1–3 do produto-alvo: receber, devolver o resultado e consultar/listar.
+Recortes em [`docs/fatia-atual.md`](docs/fatia-atual.md) (recebimento) e
+[`docs/fatia-busca.md`](docs/fatia-busca.md) (busca).
 
 - **Adicionar documento** (`/adicionar`): solta um ou mais arquivos (jpg/png/heic/pdf),
   cada um tem o SHA-256 calculado no navegador e é conferido contra o que já foi
   enviado nesta sessão antes de subir. O envio dispara `POST /documentos` e não
   trava a tela.
-- **Resultados** (`/resultado`): por documento enviado nesta sessão, faz *poll* de
-  `GET /documentos/:id` (pausando quando a aba perde o foco) e mostra, ao concluir,
-  o tipo, os campos extraídos com confiança individual e o nome de arquivo
-  padronizado. Enquanto processa, uma espera explícita (até 40 s). Em falha,
-  mensagem humana e "tentar de novo".
+- **Resultados** (`/resultado`): visão ao vivo do que você enviou nesta sessão —
+  faz *poll* de `GET /documentos/:id` (pausa em aba sem foco), mostra tipo, campos
+  com confiança individual, nome padronizado. Espera explícita durante o
+  processamento. Confiança baixa segura o documento para conferência humana. Em
+  falha, mensagem humana e "tentar de novo".
+- **Processados** (`/processados`): todos os documentos já processados (acervo
+  fictício + sessão), `GET /documentos` paginado. Busca por nome do arquivo,
+  titular, tipo ou qualquer valor de campo lido. Filtro por status. Clicar numa
+  linha expande o resultado ali mesmo.
 
-**Fora desta fatia:** fila de conferência, `claim`, correção de campo, busca/histórico.
+**Fora destas fatias:** fila de conferência, `claim`, correção de campo.
 
 ## Stack
 
@@ -55,29 +59,28 @@ npm run lint       # oxlint
 
 ```
 src/
-  app/
-    queryClient.ts        # QueryClient — retry/backoff, 404 não-retentável
+  app/queryClient.ts       # QueryClient — retry/backoff, 404 não-retentável
   api/
-    client.ts             # fetch base + ErroApi (BASE_URL = /api)
-    documentos.ts          # enviar/buscar + hooks (useEnviarDocumento, useDocumento)
+    client.ts              # fetch base + ErroApi (BASE_URL = /api)
+    documentos.ts          # hooks: useEnviarDocumento, useDocumento, useDocumentos
   lib/
-    hash.ts               # SHA-256 via crypto.subtle
-    documento.ts          # rótulos, formatação, faixas de confiança
-  features/upload/
-    useFilaUpload.ts      # fila local: lendo -> pronto/duplicado -> enviando -> enviado
-  session/
-    SessionDocumentos.tsx # documentos enviados nesta sessão (contexto + reducer)
+    hash.ts                # SHA-256 via crypto.subtle
+    documento.ts           # rótulos, formatação, faixas de confiança
+    prng.ts  useDebounce.ts
+  features/upload/useFilaUpload.ts   # fila local do upload
+  session/SessionDocumentos.tsx      # documentos da sessão (contexto + reducer)
   routes/
-    router.tsx  Layout.tsx  AdicionarDocumento.tsx  SecaoResultado.tsx
+    router.tsx  Layout.tsx
+    AdicionarDocumento.tsx  SecaoResultado.tsx  Processados.tsx
   components/
     Dropzone  FilaUpload  StatusPill  CartaoResultado  CampoExtraido
     IndicadorConfianca  EsperaProcessando  Logo
+    ResultadoLido  LinhaProcessado  StatusBadge
   mocks/
-    handlers.ts  duble.ts  browser.ts  server.ts
-  test/
-    setup.ts  utils.tsx
+    handlers.ts  store.ts  duble.ts  acervo.ts  browser.ts  server.ts
+  test/setup.ts  test/utils.tsx
 docs/
-  adr/0001-stack.md   fatia-atual.md   contrato-api.md
+  adr/0001-stack.md   fatia-atual.md   fatia-busca.md   contrato-api.md
 ```
 
 ## Testes
@@ -85,10 +88,12 @@ docs/
 Poucos, nos pontos onde uma regressão silenciosa custaria caro (ADR-0001 §3):
 
 - `src/lib/hash.test.ts` — hash estável por conteúdo.
-- `src/features/upload/useFilaUpload.test.tsx` — detecção de duplicata pelo hash
-  antes do envio; rejeição de formato.
-- `src/components/CartaoResultado.test.tsx` — renderização do resultado a partir
-  do schema (tipo, 5 campos com confiança, nome sugerido); falha + retry.
+- `src/features/upload/useFilaUpload.test.tsx` — detecção de duplicata; rejeição de formato.
+- `src/mocks/duble.test.ts` — campos por tipo; confiança baixa segura o documento.
+- `src/components/CartaoResultado.test.tsx` — resultado a partir do schema; conferência; falha + retry.
+- `src/mocks/busca.test.ts` — `GET /documentos` pagina, ordena, filtra por status e por texto.
+- `src/routes/Processados.test.tsx` — lista, busca, paginação, expandir a linha.
+- `src/lib/documento.test.ts` — rótulos e formatação de data.
 
 ## Identidade visual
 

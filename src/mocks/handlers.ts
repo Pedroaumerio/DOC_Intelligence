@@ -2,51 +2,118 @@
  * Implementação do contrato que a Trilha B define (ver docs/contrato-api.md).
  * O mesmo arquivo serve o app (browser.ts) e os testes (server.ts).
  *
- * Escopo desta fatia: POST /documentos (recebe) e GET /documentos/:id (acompanha).
- * A latência de 5–40 s, a falha intermitente do fornecedor e a queda de confiança
- * de um campo são simuladas aqui — ver duble.ts.
+ * - POST /documentos      recebe o arquivo
+ * - GET  /documentos/:id  acompanha/consulta o resultado
+ * - GET  /documentos      lista/busca os já processados (paginado)
+ *
+ * A latência de 5–40 s, a falha intermitente e a queda de confiança de um campo
+ * são simuladas aqui — ver duble.ts. O acervo fictício vem de acervo.ts.
  */
 import { http, HttpResponse, type RequestHandler } from 'msw'
-import type { Documento, RespostaEnvio } from '../types/contrato'
+import type {
+  Documento,
+  DocumentoResumo,
+  RespostaEnvio,
+  RespostaListaDocumentos,
+  StatusDocumento,
+} from '../types/contrato'
+import { BASE_URL } from '../api/client'
+import { resetarAcervo } from './acervo'
 import {
   fornecedorFalhou,
   latenciaDuble,
   resetarDuble,
   resultadoFalhou,
   resultadoLeitura,
+  titularDoDocumento,
 } from './duble'
-import { BASE_URL } from '../api/client'
-
-interface Registro {
-  id: string
-  recebido_em: string
-  nome_original: string
-  hash: string
-  /** Instante (epoch ms) em que o resultado do fornecedor fica disponível. */
-  pronto_em: number
-  desfecho: 'lido' | 'falhou'
-  /** Congelado no primeiro acesso após ficar pronto, para não oscilar no poll. */
-  resultado?: Documento
-}
-
-const registros = new Map<string, Registro>()
-const porHash = new Map<string, string>()
-let seq = 0
+import {
+  guardar,
+  limparStore,
+  novoId,
+  porHash,
+  registros,
+  type Registro,
+} from './store'
 
 /** Zera o estado do mock entre testes (chamado no src/test/setup.ts). */
 export function resetarMock(): void {
-  registros.clear()
-  porHash.clear()
-  seq = 0
+  limparStore()
   resetarDuble()
+  resetarAcervo()
 }
 
-function novoId(): string {
-  seq += 1
-  return `doc_${Date.now().toString(36)}${seq.toString(36).padStart(3, '0')}`
+/** Resultado atual de um registro (processando enquanto não fica pronto). */
+function resolver(reg: Registro): Documento {
+  if (Date.now() < reg.pronto_em) {
+    return { id: reg.id, status: 'processando', recebido_em: reg.recebido_em }
+  }
+  reg.resultado ??=
+    reg.desfecho === 'falhou'
+      ? resultadoFalhou(reg.id, reg.recebido_em)
+      : resultadoLeitura(reg.id, reg.recebido_em, reg.nome_original)
+  return reg.resultado
+}
+
+function resumo(reg: Registro, doc: Documento): DocumentoResumo {
+  const lido =
+    doc.status === 'concluido' || doc.status === 'aguardando_conferencia'
+      ? doc
+      : null
+  return {
+    id: reg.id,
+    nome_original: reg.nome_original,
+    nome_sugerido: lido?.nome_sugerido ?? null,
+    tipo_documento: lido?.tipo_documento ?? null,
+    titular: lido ? titularDoDocumento(lido.campos) : null,
+    status: doc.status,
+    recebido_em: reg.recebido_em,
+  }
+}
+
+/** Tudo que o texto livre `q` pode casar. */
+function textoParaBusca(reg: Registro, doc: Documento): string {
+  const partes: string[] = [reg.nome_original, doc.status]
+  if (doc.status === 'concluido' || doc.status === 'aguardando_conferencia') {
+    partes.push(doc.tipo_documento, doc.nome_sugerido)
+    for (const c of Object.values(doc.campos)) partes.push(c.valor)
+  }
+  return partes.join(' ').toLowerCase()
 }
 
 export const handlers: RequestHandler[] = [
+  http.get(`${BASE_URL}/documentos`, ({ request }) => {
+    const url = new URL(request.url)
+    const pagina = Math.max(1, Number(url.searchParams.get('pagina')) || 1)
+    const tamanho = Math.min(
+      50,
+      Math.max(1, Number(url.searchParams.get('tamanho')) || 10),
+    )
+    const q = (url.searchParams.get('q') ?? '').trim().toLowerCase()
+    const status = url.searchParams.get('status') as StatusDocumento | null
+
+    let linhas = [...registros.values()].map((reg) => {
+      const doc = resolver(reg)
+      return { resumo: resumo(reg, doc), busca: textoParaBusca(reg, doc) }
+    })
+
+    if (status) linhas = linhas.filter((l) => l.resumo.status === status)
+    if (q) linhas = linhas.filter((l) => l.busca.includes(q))
+    linhas.sort((a, b) => b.resumo.recebido_em.localeCompare(a.resumo.recebido_em))
+
+    const total = linhas.length
+    const inicio = (pagina - 1) * tamanho
+    const itens = linhas.slice(inicio, inicio + tamanho).map((l) => l.resumo)
+
+    return HttpResponse.json<RespostaListaDocumentos>({
+      itens,
+      pagina,
+      tamanho,
+      total,
+      tem_proxima: inicio + tamanho < total,
+    })
+  }),
+
   http.post(`${BASE_URL}/documentos`, async ({ request }) => {
     const form = await request.formData()
     const hash = String(form.get('hash') ?? '')
@@ -73,7 +140,7 @@ export const handlers: RequestHandler[] = [
     }
 
     const id = novoId()
-    registros.set(id, {
+    guardar({
       id,
       recebido_em: new Date().toISOString(),
       nome_original: nome,
@@ -81,7 +148,6 @@ export const handlers: RequestHandler[] = [
       pronto_em: Date.now() + latenciaDuble(),
       desfecho: fornecedorFalhou() ? 'falhou' : 'lido',
     })
-    porHash.set(hash, id)
 
     return HttpResponse.json<RespostaEnvio>(
       { id, status: 'processando', ja_existia: false },
@@ -94,20 +160,6 @@ export const handlers: RequestHandler[] = [
     if (!reg) {
       return HttpResponse.json({ erro: 'nao_encontrado' }, { status: 404 })
     }
-
-    if (Date.now() < reg.pronto_em) {
-      return HttpResponse.json<Documento>({
-        id: reg.id,
-        status: 'processando',
-        recebido_em: reg.recebido_em,
-      })
-    }
-
-    reg.resultado ??=
-      reg.desfecho === 'falhou'
-        ? resultadoFalhou(reg.id, reg.recebido_em)
-        : resultadoLeitura(reg.id, reg.recebido_em, reg.nome_original)
-
-    return HttpResponse.json<Documento>(reg.resultado)
+    return HttpResponse.json<Documento>(resolver(reg))
   }),
 ]

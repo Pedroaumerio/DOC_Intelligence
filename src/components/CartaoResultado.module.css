@@ -60,26 +60,6 @@
   align-self: center;
 }
 
-.campos {
-  margin: 0;
-  padding: 4px 0 0;
-}
-
-.conferencia {
-  margin: 14px 0 4px;
-  padding: 12px 14px;
-  border-radius: var(--raio-sm);
-  border-left: 3px solid var(--conf-baixa);
-  background: color-mix(in srgb, var(--conf-baixa) 10%, transparent);
-  font-size: 0.9rem;
-  color: var(--texto-claro);
-  max-width: 52ch;
-}
-
-.conferencia strong {
-  color: var(--conf-baixa);
-}
-
 .falha {
   display: flex;
   flex-direction: column;
@@ -109,41 +89,4 @@
 .botaoRetry:disabled {
   opacity: 0.6;
   cursor: progress;
-}
-
-.nomeSugerido {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--linha);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.rotuloNome {
-  font-family: var(--fonte-secundaria);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--texto-secundario);
-}
-
-.codigoNome {
-  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
-  font-size: 0.9rem;
-  color: var(--acento);
-  background: rgba(255, 193, 103, 0.08);
-  border: 1px solid rgba(255, 193, 103, 0.25);
-  border-radius: var(--raio-sm);
-  padding: 8px 12px;
-  word-break: break-all;
-}
-
-.trocaNome {
-  font-size: 0.8rem;
-  color: var(--texto-secundario);
-}
-
-.riscado {
-  text-decoration: line-through;
 }

@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom'
 import { Layout } from './Layout'
 import { AdicionarDocumento } from './AdicionarDocumento'
+import { Processados } from './Processados'
 import { SecaoResultado } from './SecaoResultado'
 
 export const router = createBrowserRouter([
@@ -11,6 +12,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="/adicionar" replace /> },
       { path: 'adicionar', element: <AdicionarDocumento /> },
       { path: 'resultado', element: <SecaoResultado /> },
+      { path: 'processados', element: <Processados /> },
       { path: '*', element: <Navigate to="/adicionar" replace /> },
     ],
   },

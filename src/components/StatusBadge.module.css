@@ -1,0 +1,41 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fonte-secundaria);
+  font-size: 0.72rem;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--linha-forte);
+  color: var(--texto-secundario);
+}
+
+.badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.badge[data-status='concluido'] {
+  color: var(--conf-alta);
+  border-color: color-mix(in srgb, var(--conf-alta) 45%, transparent);
+}
+
+.badge[data-status='aguardando_conferencia'] {
+  color: var(--conf-baixa);
+  border-color: color-mix(in srgb, var(--conf-baixa) 45%, transparent);
+}
+
+.badge[data-status='falhou'] {
+  color: var(--estado-erro);
+  border-color: color-mix(in srgb, var(--estado-erro) 45%, transparent);
+}
+
+.badge[data-status='processando'] {
+  color: var(--estado-processando);
+  border-color: color-mix(in srgb, var(--estado-processando) 45%, transparent);
+}

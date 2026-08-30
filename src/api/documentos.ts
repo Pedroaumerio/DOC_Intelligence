@@ -1,10 +1,17 @@
 import {
+  keepPreviousData,
   queryOptions,
   useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query'
-import type { Documento, EnvioDocumento, RespostaEnvio } from '../types/contrato'
+import type {
+  BuscaDocumentos,
+  Documento,
+  EnvioDocumento,
+  RespostaEnvio,
+  RespostaListaDocumentos,
+} from '../types/contrato'
 import { getJson, postForm } from './client'
 
 async function enviarDocumento(envio: EnvioDocumento): Promise<RespostaEnvio> {
@@ -17,6 +24,18 @@ async function enviarDocumento(envio: EnvioDocumento): Promise<RespostaEnvio> {
 
 async function buscarDocumento(id: string): Promise<Documento> {
   return (await getJson(`/documentos/${id}`)) as Documento
+}
+
+async function buscarDocumentos(
+  busca: BuscaDocumentos,
+): Promise<RespostaListaDocumentos> {
+  const p = new URLSearchParams()
+  if (busca.pagina) p.set('pagina', String(busca.pagina))
+  if (busca.tamanho) p.set('tamanho', String(busca.tamanho))
+  if (busca.q?.trim()) p.set('q', busca.q.trim())
+  if (busca.status) p.set('status', busca.status)
+  const qs = p.toString()
+  return (await getJson(`/documentos${qs ? `?${qs}` : ''}`)) as RespostaListaDocumentos
 }
 
 /** Intervalo do poll de acompanhamento. Os testes reduzem para não esperar 3 s. */
@@ -43,6 +62,16 @@ export function documentoQuery(id: string) {
 /** Acompanha um documento enviado nesta sessão até concluir ou falhar. */
 export function useDocumento(id: string) {
   return useQuery(documentoQuery(id))
+}
+
+/** Lista/busca os documentos já processados. Mantém a página anterior enquanto
+ * a próxima carrega, para a tabela não piscar ao paginar/filtrar. */
+export function useDocumentos(busca: BuscaDocumentos) {
+  return useQuery({
+    queryKey: ['documentos', busca],
+    queryFn: () => buscarDocumentos(busca),
+    placeholderData: keepPreviousData,
+  })
 }
 
 /** Envia um arquivo. A resposta é só o id; o processamento segue assíncrono. */
