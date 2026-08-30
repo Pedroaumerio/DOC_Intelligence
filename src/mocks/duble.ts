@@ -1,8 +1,13 @@
 /*
  * O "dublê" do fornecedor. O enunciado cita um serviço externo de classificação
- * e extração; nesta fatia ele é esta função. Ela varia a confiança e às vezes
- * derruba um campo de propósito, para que a próxima fatia (conferência humana)
- * tenha o caso de baixa confiança para tratar — mesmo sem consumi-lo ainda.
+ * e extração; nesta fatia ele é esta função — não há OCR nem chamada externa, os
+ * dados são fictícios de propósito (o mock é só para demonstração).
+ *
+ * O que ele simula, que é o que a tela existe para tratar: latência de 5–40 s,
+ * falha intermitente do fornecedor, e confiança que varia por campo (às vezes um
+ * campo cai de propósito, para a próxima fatia — conferência humana — ter o caso
+ * de baixa confiança). Sorteia entre algumas identidades fictícias para a demo
+ * não ficar repetitiva.
  */
 import type {
   CamposExtraidos,
@@ -20,6 +25,8 @@ export interface ConfigDuble {
   probFalha: number
   /** Probabilidade de um campo voltar com confiança baixa de propósito. */
   probQuedaCampo: number
+  /** Fixa a identidade fictícia (índice do pool). null = sorteia pelo id do doc. */
+  indiceIdentidade: number | null
 }
 
 export const configPadrao: ConfigDuble = {
@@ -27,6 +34,7 @@ export const configPadrao: ConfigDuble = {
   latenciaMaxMs: 18_000,
   probFalha: 0.12,
   probQuedaCampo: 0.4,
+  indiceIdentidade: null,
 }
 
 let config: ConfigDuble = { ...configPadrao }
@@ -48,28 +56,88 @@ export function fornecedorFalhou(): boolean {
   return Math.random() < config.probFalha
 }
 
-const CAMPOS_IDENTIDADE_BASE: Array<[string, string, number]> = [
-  ['nome', 'João da Silva', 0.97],
-  ['filiacao', 'Maria da Silva e José da Silva', 0.93],
-  ['data_nascimento', '1990-04-12', 0.99],
-  ['numero', '12.345.678-9', 0.88],
-  ['orgao_emissor', 'SSP/RN', 0.71],
+interface Identidade {
+  nome: string
+  filiacao: string
+  data_nascimento: string
+  numero: string
+  orgao_emissor: string
+}
+
+/** Identidades fictícias. A #0 é o exemplo do enunciado. */
+const IDENTIDADES: Identidade[] = [
+  {
+    nome: 'João da Silva',
+    filiacao: 'Maria da Silva e José da Silva',
+    data_nascimento: '1990-04-12',
+    numero: '12.345.678-9',
+    orgao_emissor: 'SSP/RN',
+  },
+  {
+    nome: 'Ana Beatriz Nogueira Alves',
+    filiacao: 'Cláudia Nogueira Alves e Roberto Alves Pereira',
+    data_nascimento: '1985-09-27',
+    numero: '23.987.654-1',
+    orgao_emissor: 'SSP/CE',
+  },
+  {
+    nome: 'Carlos Eduardo Ramos Lima',
+    filiacao: 'Fátima Ramos Lima e Antônio Lima Souza',
+    data_nascimento: '1978-01-03',
+    numero: '8.221.447-0',
+    orgao_emissor: 'SSP/SP',
+  },
+  {
+    nome: 'Mariana Costa Ferreira',
+    filiacao: 'Sônia Costa Ferreira e Paulo Ferreira Dias',
+    data_nascimento: '1996-11-19',
+    numero: '45.112.908-6',
+    orgao_emissor: 'SSP/BA',
+  },
+  {
+    nome: 'Rafael Augusto Menezes',
+    filiacao: 'Lúcia Menezes Carvalho e Jorge Augusto Menezes',
+    data_nascimento: '2001-06-08',
+    numero: '19.554.230-3',
+    orgao_emissor: 'SSPDS/PE',
+  },
 ]
+
+const CONF_BASE: Record<keyof Identidade, number> = {
+  nome: 0.97,
+  filiacao: 0.93,
+  data_nascimento: 0.99,
+  numero: 0.88,
+  orgao_emissor: 0.71,
+}
 
 function variar(base: number): number {
   const delta = (Math.random() - 0.5) * 0.08
   return Math.min(0.995, Math.max(0.05, Number((base + delta).toFixed(2))))
 }
 
+/** Índice estável a partir de uma string, para o mesmo doc cair sempre na mesma pessoa. */
+function indiceEstavel(chave: string, tamanho: number): number {
+  let h = 0
+  for (let i = 0; i < chave.length; i++) h = (h * 31 + chave.charCodeAt(i)) | 0
+  return Math.abs(h) % tamanho
+}
+
 /** Monta o resultado de uma identidade, com a variação e a queda de campo. */
-export function classificarIdentidade(nomeOriginal: string): {
+export function classificarIdentidade(
+  nomeOriginal: string,
+  seed = nomeOriginal,
+): {
   tipo_documento: TipoDocumento
   nome_sugerido: string
   campos: CamposExtraidos
 } {
+  const idx = config.indiceIdentidade ?? indiceEstavel(seed, IDENTIDADES.length)
+  const pessoa = IDENTIDADES[idx % IDENTIDADES.length]!
+
   const campos: CamposExtraidos = {}
-  for (const [chave, valor, confBase] of CAMPOS_IDENTIDADE_BASE) {
-    campos[chave] = { valor, confianca: variar(confBase) }
+  for (const chave of Object.keys(CONF_BASE) as (keyof Identidade)[]) {
+    campos[chave] = { valor: pessoa[chave], confianca: variar(CONF_BASE[chave]) }
   }
 
   if (Math.random() < config.probQuedaCampo) {
@@ -83,7 +151,7 @@ export function classificarIdentidade(nomeOriginal: string): {
 
   return {
     tipo_documento: 'identidade',
-    nome_sugerido: nomeSugerido('identidade', campos['nome']!.valor, nomeOriginal),
+    nome_sugerido: nomeSugerido('identidade', pessoa.nome, nomeOriginal),
     campos,
   }
 }
@@ -114,7 +182,7 @@ export function resultadoConcluido(
     id,
     recebido_em: recebidoEm,
     status: 'concluido',
-    ...classificarIdentidade(nomeOriginal),
+    ...classificarIdentidade(nomeOriginal, id),
   }
 }
 

@@ -89,16 +89,20 @@ Reenviar o mesmo arquivo depois de uma falha reprocessa mantendo o mesmo `id`.
 
 ## O dublê do fornecedor
 
-Não há serviço externo nesta fatia. A classificação/extração é a função em
+Não há serviço externo nem OCR nesta fatia — o mock é só para demonstração e os
+dados são fictícios. A classificação/extração é a função em
 [`src/mocks/duble.ts`](../src/mocks/duble.ts), que:
 
 - responde com latência aleatória (5–18 s por padrão no exercício; produção
   observa até 40 s);
 - falha de forma intermitente (~12% dos envios) para exercitar o estado `falhou`;
-- às vezes derruba a confiança de um campo de propósito, para que a próxima
-  fatia (conferência humana) tenha o caso de baixa confiança para tratar.
+- devolve uma de ~5 identidades fictícias (a #0 é o exemplo do enunciado,
+  "João da Silva"), estável por documento;
+- varia a confiança de cada campo e às vezes derruba um campo de propósito, para
+  que a próxima fatia (conferência humana) tenha o caso de baixa confiança.
 
-Os testes zeram latência e aleatoriedade via `configurarDuble()`.
+Os testes zeram latência e aleatoriedade e fixam a identidade via
+`configurarDuble()`.
 
 ---
 

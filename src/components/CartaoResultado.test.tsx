@@ -6,7 +6,13 @@ import { enviarArquivoFalso, Provedores } from '../test/utils'
 import { CartaoResultado } from './CartaoResultado'
 
 beforeEach(() => {
-  configurarDuble({ latenciaMinMs: 10, latenciaMaxMs: 10, probFalha: 0, probQuedaCampo: 0 })
+  configurarDuble({
+    latenciaMinMs: 10,
+    latenciaMaxMs: 10,
+    probFalha: 0,
+    probQuedaCampo: 0,
+    indiceIdentidade: 0, // fixa na identidade do exemplo do enunciado
+  })
 })
 
 test('mostra o tipo, os cinco campos com confiança e o nome padronizado', async () => {
