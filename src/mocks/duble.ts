@@ -332,7 +332,7 @@ export function titularDoDocumento(campos: CamposExtraidos): string | null {
 /** Quantos modelos há no pool — usado pelo acervo. */
 export const TAMANHO_POOL = POOL.length
 
-function nomeSugerido(tipo: string, nome: string, nomeOriginal: string): string {
+export function nomeSugerido(tipo: string, nome: string, nomeOriginal: string): string {
   const base = nome.trim() ? nome : tipo
   const slug =
     base

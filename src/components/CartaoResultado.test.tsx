@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, test } from 'vitest'
 import { configurarDuble } from '../mocks/duble'
@@ -52,11 +52,36 @@ test('confiança baixa segura o documento para conferência humana', async () =>
 
   // não entra como pronto: aparece o aviso de conferência
   expect(await screen.findByText('Aguardando conferência')).toBeInTheDocument()
-  expect(screen.getByText(/fica para conferência humana/i)).toBeInTheDocument()
+  expect(screen.getByText(/não entra como pronto/i)).toBeInTheDocument()
 
   // os campos ainda aparecem, e pelo menos um marcado para revisar
   expect(screen.getByText('João da Silva')).toBeInTheDocument()
   expect(screen.getAllByText(/revisar/i).length).toBeGreaterThan(0)
+
+  // e há o botão de conferir/corrigir
+  expect(
+    screen.getByRole('button', { name: /conferir e corrigir/i }),
+  ).toBeInTheDocument()
+})
+
+test('conferir e corrigir marca o documento como pronto', async () => {
+  configurarDuble({ indiceDocumento: 0, probQuedaCampo: 1 })
+  const doc = await enviarArquivoFalso('rg.jpeg')
+  render(<CartaoResultado doc={doc} />, { wrapper: Provedores })
+
+  await screen.findByText('Aguardando conferência')
+  await userEvent.click(screen.getByRole('button', { name: /conferir e corrigir/i }))
+
+  const inputNome = screen.getByLabelText(/^nome/i)
+  await userEvent.clear(inputNome)
+  await userEvent.type(inputNome, 'João da Silva Conferido')
+  await userEvent.click(screen.getByRole('button', { name: /salvar conferência/i }))
+
+  // volta como concluído: sem o chip de conferência, com o valor corrigido
+  await waitFor(() =>
+    expect(screen.queryByText('Aguardando conferência')).not.toBeInTheDocument(),
+  )
+  expect(screen.getByText('João da Silva Conferido')).toBeInTheDocument()
 })
 
 test('falha do fornecedor é humana e permite tentar de novo', async () => {

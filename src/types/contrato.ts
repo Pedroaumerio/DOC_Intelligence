@@ -127,3 +127,14 @@ export interface RespostaListaDocumentos {
   total: number
   tem_proxima: boolean
 }
+
+// --- PATCH /documentos/:id — conferência humana ------------------------
+
+/**
+ * Corpo de PATCH /documentos/:id. A pessoa conferente confirma/corrige os
+ * valores de um documento que ficou pendente; ele então passa a `concluido`.
+ * Campos tocados (ou que estavam incertos) voltam com confiança 1.
+ */
+export interface ConferenciaDocumento {
+  campos: Record<string, string>
+}

@@ -1,9 +1,16 @@
-.conferencia {
+.conferenciaBox {
   margin: 0 0 4px;
   padding: 12px 14px;
   border-radius: var(--raio-sm);
   border-left: 3px solid var(--conf-baixa);
   background: color-mix(in srgb, var(--conf-baixa) 10%, transparent);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.conferencia {
   font-size: 0.9rem;
   color: var(--texto-claro);
   max-width: 52ch;
@@ -11,6 +18,18 @@
 
 .conferencia strong {
   color: var(--conf-baixa);
+}
+
+.corrigir {
+  background: var(--acento);
+  color: var(--preto);
+  border: 0;
+  border-radius: var(--raio-sm);
+  padding: 8px 16px;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
 }
 
 .campos {

@@ -162,6 +162,30 @@ Reenviar o mesmo arquivo depois de uma falha reprocessa mantendo o mesmo `id`.
 
 ---
 
+## `PATCH /documentos/:id` — conferência humana
+
+A pessoa conferente confirma/corrige os campos de um documento que ficou
+`aguardando_conferencia`. Ele passa a `concluido`.
+
+**Request** — `application/json`
+
+```json
+{ "campos": { "contratante": "Maria de Fátima Sales Nogueira", "objeto": "..." } }
+```
+
+Envia todos os valores exibidos (corrigidos ou confirmados). No resultado:
+
+- campo **alterado** ou que estava em `campos_incertos` → `confianca: 1` (verificado por humano);
+- os demais mantêm a confiança da máquina;
+- `campos_incertos` some, `status` vira `concluido`;
+- `nome_sugerido` é recalculado com o titular corrigido.
+
+**Response `200`** — o `DocumentoConcluido` atualizado.
+
+**`409`** — `{ "erro": "nao_editavel" }` se o documento não está `aguardando_conferencia`.
+
+---
+
 ## O dublê do fornecedor
 
 Não há serviço externo nem OCR nesta fatia — o mock é só para demonstração e os

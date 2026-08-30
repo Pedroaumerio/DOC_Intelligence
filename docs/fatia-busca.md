@@ -1,8 +1,9 @@
 # DOC Intelligence — fatia de busca
 
 - **Cobre:** comportamento 3 do produto-alvo — consultar o resultado de um
-  documento e listar os já processados.
-- **Não cobre:** fila de conferência, `claim`, correção de campo. Próxima fatia.
+  documento e listar os já processados. Mais a **edição/conferência** dos
+  documentos que ficaram com pendência (`aguardando_conferencia`).
+- **Não cobre:** fila de conferência com `claim` (duas pessoas ao mesmo tempo).
 - Continuação de [`fatia-atual.md`](fatia-atual.md) (recebimento).
 
 ---
@@ -24,6 +25,7 @@ Uma página nova, **Processados**, separada de "Resultados":
 | Filtro de status | Todos / concluído / aguardando conferência / falhou / processando |
 | Paginação | Anterior / Próxima, "Página X de Y". A página anterior fica visível enquanto a próxima carrega (`keepPreviousData`) |
 | Consultar o resultado | Clicar numa linha **expande** ali mesmo: campos com confiança, nome padronizado, aviso de conferência ou mensagem de falha. O detalhe vem de `GET /documentos/:id` (carregado sob demanda) |
+| Editar (pendências) | Documento `aguardando_conferencia` mostra "Conferir e corrigir". Abre um formulário com todos os campos (os incertos marcados); ao salvar (`PATCH /documentos/:id`), o documento passa a `concluido`, os campos tocados/incertos vão a 100% e o nome padronizado é recalculado. Mesmo botão aparece no cartão da sessão ("Resultados") |
 
 ## 3. O que o mock precisa
 

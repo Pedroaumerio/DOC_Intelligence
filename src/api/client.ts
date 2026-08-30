@@ -31,3 +31,11 @@ export function getJson(caminho: string): Promise<unknown> {
 export function postForm(caminho: string, form: FormData): Promise<unknown> {
   return fetch(`${BASE_URL}${caminho}`, { method: 'POST', body: form }).then(tratar)
 }
+
+export function patchJson(caminho: string, corpo: unknown): Promise<unknown> {
+  return fetch(`${BASE_URL}${caminho}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(corpo),
+  }).then(tratar)
+}

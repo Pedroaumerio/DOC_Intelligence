@@ -11,7 +11,10 @@
  */
 import { http, HttpResponse, type RequestHandler } from 'msw'
 import type {
+  CamposExtraidos,
+  ConferenciaDocumento,
   Documento,
+  DocumentoConcluido,
   DocumentoResumo,
   RespostaEnvio,
   RespostaListaDocumentos,
@@ -22,6 +25,7 @@ import { resetarAcervo } from './acervo'
 import {
   fornecedorFalhou,
   latenciaDuble,
+  nomeSugerido,
   resetarDuble,
   resultadoFalhou,
   resultadoLeitura,
@@ -161,5 +165,46 @@ export const handlers: RequestHandler[] = [
       return HttpResponse.json({ erro: 'nao_encontrado' }, { status: 404 })
     }
     return HttpResponse.json<Documento>(resolver(reg))
+  }),
+
+  // Conferência humana: confirma/corrige um documento pendente -> concluído.
+  http.patch(`${BASE_URL}/documentos/:id`, async ({ params, request }) => {
+    const reg = registros.get(String(params.id))
+    if (!reg) {
+      return HttpResponse.json({ erro: 'nao_encontrado' }, { status: 404 })
+    }
+    const atual = resolver(reg)
+    if (atual.status !== 'aguardando_conferencia') {
+      return HttpResponse.json({ erro: 'nao_editavel' }, { status: 409 })
+    }
+
+    const { campos } = (await request.json()) as ConferenciaDocumento
+    const incertos = new Set(atual.campos_incertos)
+    const novos: CamposExtraidos = {}
+    for (const [chave, campo] of Object.entries(atual.campos)) {
+      const valorNovo = campos[chave]
+      const mudou = valorNovo !== undefined && valorNovo !== campo.valor
+      novos[chave] = {
+        valor: valorNovo ?? campo.valor,
+        // conferido por humano: campo corrigido ou que estava incerto vira 1
+        confianca: mudou || incertos.has(chave) ? 1 : campo.confianca,
+      }
+    }
+
+    const conferido: DocumentoConcluido = {
+      id: reg.id,
+      recebido_em: reg.recebido_em,
+      status: 'concluido',
+      tipo_documento: atual.tipo_documento,
+      nome_sugerido: nomeSugerido(
+        atual.tipo_documento,
+        titularDoDocumento(novos) ?? '',
+        reg.nome_original,
+      ),
+      campos: novos,
+    }
+    reg.resultado = conferido
+    reg.desfecho = 'lido'
+    return HttpResponse.json<Documento>(conferido)
   }),
 ]

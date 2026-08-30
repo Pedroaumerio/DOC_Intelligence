@@ -1,0 +1,100 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 4px;
+}
+
+.instrucao {
+  font-size: 0.9rem;
+  color: var(--texto-claro);
+  border-left: 3px solid var(--conf-baixa);
+  padding-left: 12px;
+  max-width: 52ch;
+}
+
+.campos {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 12px;
+  border-left: 2px solid transparent;
+}
+
+.campo[data-incerto] {
+  border-left-color: var(--conf-baixa);
+}
+
+.rotulo {
+  font-family: var(--fonte-secundaria);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--texto-secundario);
+}
+
+.marca {
+  color: var(--conf-baixa);
+  font-weight: 600;
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: var(--raio-sm);
+  border: 1px solid var(--linha-forte);
+  background: var(--bg-base);
+  color: var(--texto-claro);
+  font: inherit;
+}
+
+.input:focus-visible {
+  border-color: var(--acento);
+  outline: none;
+}
+
+textarea.input {
+  resize: vertical;
+}
+
+.erro {
+  font-size: 0.85rem;
+  color: var(--estado-erro);
+}
+
+.acoes {
+  display: flex;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.salvar {
+  background: var(--acento);
+  color: var(--preto);
+  border: 0;
+  border-radius: var(--raio-sm);
+  padding: 9px 18px;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.salvar:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.cancelar {
+  background: transparent;
+  color: var(--texto-secundario);
+  border: 1px solid var(--linha-forte);
+  border-radius: var(--raio-sm);
+  padding: 9px 16px;
+  cursor: pointer;
+}

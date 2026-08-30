@@ -8,11 +8,12 @@ import {
 import type {
   BuscaDocumentos,
   Documento,
+  DocumentoConcluido,
   EnvioDocumento,
   RespostaEnvio,
   RespostaListaDocumentos,
 } from '../types/contrato'
-import { getJson, postForm } from './client'
+import { getJson, patchJson, postForm } from './client'
 
 async function enviarDocumento(envio: EnvioDocumento): Promise<RespostaEnvio> {
   const form = new FormData()
@@ -24,6 +25,13 @@ async function enviarDocumento(envio: EnvioDocumento): Promise<RespostaEnvio> {
 
 async function buscarDocumento(id: string): Promise<Documento> {
   return (await getJson(`/documentos/${id}`)) as Documento
+}
+
+async function conferirDocumento(
+  id: string,
+  campos: Record<string, string>,
+): Promise<DocumentoConcluido> {
+  return (await patchJson(`/documentos/${id}`, { campos })) as DocumentoConcluido
 }
 
 async function buscarDocumentos(
@@ -62,6 +70,21 @@ export function documentoQuery(id: string) {
 /** Acompanha um documento enviado nesta sessão até concluir ou falhar. */
 export function useDocumento(id: string) {
   return useQuery(documentoQuery(id))
+}
+
+/**
+ * Conferência humana: confirma/corrige os campos de um documento pendente.
+ * Ao salvar, o documento passa a `concluido` e a lista de processados atualiza.
+ */
+export function useConferirDocumento(id: string) {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (campos: Record<string, string>) => conferirDocumento(id, campos),
+    onSuccess: (doc) => {
+      client.setQueryData(['documento', id], doc)
+      void client.invalidateQueries({ queryKey: ['documentos'] })
+    },
+  })
 }
 
 /** Lista/busca os documentos já processados. Mantém a página anterior enquanto
