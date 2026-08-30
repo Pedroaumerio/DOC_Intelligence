@@ -1,0 +1,23 @@
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+  gap: 4px;
+}
+
+.marca {
+  font-family: var(--fonte-titulo);
+  font-weight: 700;
+  font-size: 1.15rem;
+  letter-spacing: 0.32em;
+  color: var(--texto-claro);
+}
+
+.sub {
+  font-family: var(--fonte-secundaria);
+  font-weight: 400;
+  font-size: 0.6rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--texto-secundario);
+}

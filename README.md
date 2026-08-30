@@ -3,9 +3,23 @@
 Interface de atendimento para triagem, acompanhamento e conferência humana de
 documentos processados por um modelo multimodal de terceiro.
 
-O **desenvolvimento ainda não começou**. Este repositório contém apenas a stack
-instalada e configurada, conforme a decisão registrada em
-[`docs/adr/0001-stack.md`](docs/adr/0001-stack.md).
+## Fatia implementada
+
+Receber o documento e devolver o resultado da classificação/extração — os
+comportamentos 1 e 2 do produto-alvo. Recorte detalhado em
+[`docs/fatia-atual.md`](docs/fatia-atual.md).
+
+- **Adicionar documento** (`/adicionar`): solta um ou mais arquivos (jpg/png/heic/pdf),
+  cada um tem o SHA-256 calculado no navegador e é conferido contra o que já foi
+  enviado nesta sessão antes de subir. O envio dispara `POST /documentos` e não
+  trava a tela.
+- **Resultados** (`/resultado`): por documento enviado nesta sessão, faz *poll* de
+  `GET /documentos/:id` (pausando quando a aba perde o foco) e mostra, ao concluir,
+  o tipo, os campos extraídos com confiança individual e o nome de arquivo
+  padronizado. Enquanto processa, uma espera explícita (até 40 s). Em falha,
+  mensagem humana e "tentar de novo".
+
+**Fora desta fatia:** fila de conferência, `claim`, correção de campo, busca/histórico.
 
 ## Stack
 
@@ -19,6 +33,10 @@ instalada e configurada, conforme a decisão registrada em
 | Mock da API | MSW v2 (browser + node) |
 | Testes | Vitest + Testing Library |
 | Estilo | CSS Modules |
+
+Estado de servidor fica no TanStack Query; o pouco estado de aplicação (fila de
+upload, documentos enviados na sessão) é local, em `useState`/`useReducer` e um
+contexto de sessão. Não há store global.
 
 ## Scripts
 
@@ -37,26 +55,44 @@ npm run lint       # oxlint
 
 ```
 src/
-  api/          # clientes fetch + hooks do TanStack Query   (vazio)
-  components/   # componentes de UI                          (vazio)
-  routes/       # páginas do React Router                    (vazio)
-  types/        # tipos do contrato da API                   (vazio)
+  app/
+    queryClient.ts        # QueryClient — retry/backoff, 404 não-retentável
+  api/
+    client.ts             # fetch base + ErroApi (BASE_URL = /api)
+    documentos.ts          # enviar/buscar + hooks (useEnviarDocumento, useDocumento)
+  lib/
+    hash.ts               # SHA-256 via crypto.subtle
+    documento.ts          # rótulos, formatação, faixas de confiança
+  features/upload/
+    useFilaUpload.ts      # fila local: lendo -> pronto/duplicado -> enviando -> enviado
+  session/
+    SessionDocumentos.tsx # documentos enviados nesta sessão (contexto + reducer)
+  routes/
+    router.tsx  Layout.tsx  AdicionarDocumento.tsx  SecaoResultado.tsx
+  components/
+    Dropzone  FilaUpload  StatusPill  CartaoResultado  CampoExtraido
+    IndicadorConfianca  EsperaProcessando  Logo
   mocks/
-    handlers.ts # handlers MSW do contrato                   (vazio, plugado)
-    browser.ts  # worker MSW para o app
-    server.ts   # servidor MSW para os testes
+    handlers.ts  duble.ts  browser.ts  server.ts
   test/
-    setup.ts             # jest-dom + ciclo de vida do MSW
-    stack.smoke.test.tsx  # valida o encanamento da stack
+    setup.ts  utils.tsx
 docs/
-  adr/0001-stack.md   # decisão da stack
-  contrato-api.md     # contrato da API (a definir)
-public/
-  mockServiceWorker.js  # worker do MSW (gerado por `msw init`)
+  adr/0001-stack.md   fatia-atual.md   contrato-api.md
 ```
 
-## Próximo passo
+## Testes
 
-Definir o contrato da API em `docs/contrato-api.md`, tipá-lo em `src/types/` e
-implementar os handlers em `src/mocks/handlers.ts`. Só então ligar o
-`QueryClientProvider`, o router e o `worker.start()` em `src/main.tsx`.
+Poucos, nos pontos onde uma regressão silenciosa custaria caro (ADR-0001 §3):
+
+- `src/lib/hash.test.ts` — hash estável por conteúdo.
+- `src/features/upload/useFilaUpload.test.tsx` — detecção de duplicata pelo hash
+  antes do envio; rejeição de formato.
+- `src/components/CartaoResultado.test.tsx` — renderização do resultado a partir
+  do schema (tipo, 5 campos com confiança, nome sugerido); falha + retry.
+
+## Identidade visual
+
+Tokens da Lamarck Advogados em [`src/index.css`](src/index.css). O âmbar da marca
+(`--acento`) fica reservado para ação primária, logo e foco; os estados de
+confiança/processamento usam uma paleta semântica separada
+(verde/neutro/vermelho), de propósito.

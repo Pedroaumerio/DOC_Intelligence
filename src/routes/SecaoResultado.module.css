@@ -1,0 +1,33 @@
+.titulo {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.intro {
+  color: var(--texto-secundario);
+  font-size: 0.95rem;
+  max-width: 54ch;
+  margin-bottom: 24px;
+}
+
+.pilha {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.vazio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 32px;
+  border: 1px dashed var(--linha-forte);
+  border-radius: var(--raio);
+  color: var(--texto-secundario);
+}
+
+.link {
+  color: var(--acento);
+  font-weight: 500;
+}

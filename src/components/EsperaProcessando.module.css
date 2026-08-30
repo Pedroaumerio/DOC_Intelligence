@@ -1,0 +1,53 @@
+.raiz {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 20px 0 4px;
+}
+
+.barra {
+  position: relative;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--linha);
+  overflow: hidden;
+}
+
+.pulso {
+  position: absolute;
+  inset: 0;
+  width: 40%;
+  border-radius: 999px;
+  background: var(--estado-processando);
+  animation: desliza 1.6s ease-in-out infinite;
+}
+
+@keyframes desliza {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulso {
+    animation: none;
+    width: 100%;
+    opacity: 0.5;
+  }
+}
+
+.mensagem {
+  font-size: 0.95rem;
+  color: var(--texto-claro);
+  max-width: 46ch;
+}
+
+.tempo {
+  font-family: var(--fonte-secundaria);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-secundario);
+}

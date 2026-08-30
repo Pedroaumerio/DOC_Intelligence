@@ -1,0 +1,28 @@
+.zona {
+  border: 1.5px dashed var(--linha-forte);
+  border-radius: var(--raio);
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--bg-elevado);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.zona:hover,
+.zona[data-sobre] {
+  border-color: var(--acento);
+  background: rgba(255, 193, 103, 0.06);
+}
+
+.titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--texto-claro);
+}
+
+.ajuda {
+  margin-top: 6px;
+  font-size: 0.88rem;
+  color: var(--texto-secundario);
+}

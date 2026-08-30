@@ -1,0 +1,111 @@
+.cartao {
+  background: var(--bg-elevado);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  padding: 20px 22px;
+  box-shadow: var(--sombra);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.original {
+  font-family: var(--fonte-secundaria);
+  font-size: 0.85rem;
+  color: var(--texto-secundario);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60%;
+}
+
+.tipo {
+  flex: none;
+  font-family: var(--fonte-titulo);
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--texto-claro);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--linha-forte);
+  border-radius: 999px;
+  padding: 4px 12px;
+}
+
+.campos {
+  margin: 0;
+  padding: 4px 0 0;
+}
+
+.falha {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px 0 4px;
+}
+
+.falha p {
+  color: var(--texto-claro);
+  font-size: 0.95rem;
+  max-width: 46ch;
+  border-left: 3px solid var(--estado-erro);
+  padding-left: 12px;
+}
+
+.botaoRetry {
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-sm);
+  padding: 8px 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.botaoRetry:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.nomeSugerido {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--linha);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rotuloNome {
+  font-family: var(--fonte-secundaria);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--texto-secundario);
+}
+
+.codigoNome {
+  font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace;
+  font-size: 0.9rem;
+  color: var(--acento);
+  background: rgba(255, 193, 103, 0.08);
+  border: 1px solid rgba(255, 193, 103, 0.25);
+  border-radius: var(--raio-sm);
+  padding: 8px 12px;
+  word-break: break-all;
+}
+
+.trocaNome {
+  font-size: 0.8rem;
+  color: var(--texto-secundario);
+}
+
+.riscado {
+  text-decoration: line-through;
+}

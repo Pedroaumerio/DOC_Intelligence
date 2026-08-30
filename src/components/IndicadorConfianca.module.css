@@ -1,0 +1,35 @@
+.raiz {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--fonte-secundaria);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--texto-secundario);
+}
+
+.ponto {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--conf-media);
+  flex: none;
+}
+
+.raiz[data-nivel='alta'] .ponto {
+  background: var(--conf-alta);
+}
+.raiz[data-nivel='alta'] .pct {
+  color: var(--conf-alta);
+}
+
+.raiz[data-nivel='media'] .ponto {
+  background: var(--conf-media);
+}
+
+.raiz[data-nivel='baixa'] .ponto {
+  background: var(--conf-baixa);
+}
+.raiz[data-nivel='baixa'] .pct {
+  color: var(--conf-baixa);
+}
