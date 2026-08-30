@@ -45,6 +45,20 @@ test('mostra o tipo, os cinco campos com confiança e o nome padronizado', async
   ).toBeInTheDocument()
 })
 
+test('confiança baixa segura o documento para conferência humana', async () => {
+  configurarDuble({ probQuedaCampo: 1 }) // sempre derruba um campo
+  const doc = await enviarArquivoFalso('rg.jpeg')
+  render(<CartaoResultado doc={doc} />, { wrapper: Provedores })
+
+  // não entra como pronto: aparece o aviso de conferência
+  expect(await screen.findByText('Aguardando conferência')).toBeInTheDocument()
+  expect(screen.getByText(/fica para conferência humana/i)).toBeInTheDocument()
+
+  // os campos ainda aparecem, e pelo menos um marcado para revisar
+  expect(screen.getByText('João da Silva')).toBeInTheDocument()
+  expect(screen.getAllByText(/revisar/i).length).toBeGreaterThan(0)
+})
+
 test('falha do fornecedor é humana e permite tentar de novo', async () => {
   configurarDuble({ probFalha: 1 })
   const doc = await enviarArquivoFalso('rg.pdf')

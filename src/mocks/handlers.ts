@@ -12,8 +12,8 @@ import {
   fornecedorFalhou,
   latenciaDuble,
   resetarDuble,
-  resultadoConcluido,
   resultadoFalhou,
+  resultadoLeitura,
 } from './duble'
 import { BASE_URL } from '../api/client'
 
@@ -24,7 +24,7 @@ interface Registro {
   hash: string
   /** Instante (epoch ms) em que o resultado do fornecedor fica disponível. */
   pronto_em: number
-  desfecho: 'concluido' | 'falhou'
+  desfecho: 'lido' | 'falhou'
   /** Congelado no primeiro acesso após ficar pronto, para não oscilar no poll. */
   resultado?: Documento
 }
@@ -58,7 +58,7 @@ export const handlers: RequestHandler[] = [
       if (existente && existente.resultado?.status === 'falhou') {
         // "Tentar de novo" após falha: reprocessa mantendo o mesmo id.
         existente.pronto_em = Date.now() + latenciaDuble()
-        existente.desfecho = fornecedorFalhou() ? 'falhou' : 'concluido'
+        existente.desfecho = fornecedorFalhou() ? 'falhou' : 'lido'
         existente.resultado = undefined
         return HttpResponse.json<RespostaEnvio>(
           { id: existenteId, status: 'processando', ja_existia: false },
@@ -79,7 +79,7 @@ export const handlers: RequestHandler[] = [
       nome_original: nome,
       hash,
       pronto_em: Date.now() + latenciaDuble(),
-      desfecho: fornecedorFalhou() ? 'falhou' : 'concluido',
+      desfecho: fornecedorFalhou() ? 'falhou' : 'lido',
     })
     porHash.set(hash, id)
 
@@ -106,7 +106,7 @@ export const handlers: RequestHandler[] = [
     reg.resultado ??=
       reg.desfecho === 'falhou'
         ? resultadoFalhou(reg.id, reg.recebido_em)
-        : resultadoConcluido(reg.id, reg.recebido_em, reg.nome_original)
+        : resultadoLeitura(reg.id, reg.recebido_em, reg.nome_original)
 
     return HttpResponse.json<Documento>(reg.resultado)
   }),

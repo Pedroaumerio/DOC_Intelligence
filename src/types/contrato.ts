@@ -30,7 +30,11 @@ export interface CampoExtraido {
 /** Mapa de campos extraídos. As chaves variam por tipo de documento (fato f). */
 export type CamposExtraidos = Record<string, CampoExtraido>
 
-export type StatusDocumento = 'processando' | 'concluido' | 'falhou'
+export type StatusDocumento =
+  | 'processando'
+  | 'concluido'
+  | 'aguardando_conferencia'
+  | 'falhou'
 
 interface DocumentoBase {
   id: string
@@ -41,11 +45,25 @@ export interface DocumentoProcessando extends DocumentoBase {
   status: 'processando'
 }
 
-export interface DocumentoConcluido extends DocumentoBase {
-  status: 'concluido'
+interface DocumentoLido extends DocumentoBase {
   tipo_documento: TipoDocumento
   nome_sugerido: string
   campos: CamposExtraidos
+}
+
+/** Leitura confiável — o documento pode ser dado como pronto. */
+export interface DocumentoConcluido extends DocumentoLido {
+  status: 'concluido'
+}
+
+/**
+ * A máquina não teve confiança suficiente no que produziu (algum campo abaixo do
+ * limiar). O documento NÃO entra como pronto — fica para conferência humana, que
+ * corrige o que a máquina errou. `campos_incertos` diz o que revisar.
+ */
+export interface DocumentoAguardandoConferencia extends DocumentoLido {
+  status: 'aguardando_conferencia'
+  campos_incertos: string[]
 }
 
 export interface DocumentoFalhou extends DocumentoBase {
@@ -58,6 +76,7 @@ export interface DocumentoFalhou extends DocumentoBase {
 export type Documento =
   | DocumentoProcessando
   | DocumentoConcluido
+  | DocumentoAguardandoConferencia
   | DocumentoFalhou
 
 /** Corpo de POST /documentos (multipart/form-data). */

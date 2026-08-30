@@ -1,5 +1,5 @@
 import { useEnviarDocumento, useDocumento } from '../api/documentos'
-import { rotuloTipo } from '../lib/documento'
+import { rotuloCampo, rotuloTipo } from '../lib/documento'
 import type { DocumentoSessao } from '../session/SessionDocumentos'
 import { CampoExtraido } from './CampoExtraido'
 import { EsperaProcessando } from './EsperaProcessando'
@@ -9,6 +9,9 @@ import estilos from './CartaoResultado.module.css'
  * O que o processamento devolveu para um documento enviado nesta sessão.
  * Enquanto está em "processando", faz poll (ver documentoQuery); ao concluir,
  * mostra tipo, campos com confiança individual e o nome de arquivo sugerido.
+ *
+ * Quando a máquina não teve confiança no que produziu, o documento NÃO entra
+ * como pronto: fica marcado para conferência humana (enunciado).
  */
 export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
   const { data, isPending, isError } = useDocumento(doc.id)
@@ -17,14 +20,26 @@ export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
   const recebidoEm =
     data && 'recebido_em' in data ? data.recebido_em : doc.enviadoEm
 
+  const lido =
+    data?.status === 'concluido' || data?.status === 'aguardando_conferencia'
+      ? data
+      : null
+  const emConferencia = data?.status === 'aguardando_conferencia'
+  const incertos = new Set(emConferencia ? data.campos_incertos : [])
+
   return (
-    <article className={estilos.cartao}>
+    <article className={estilos.cartao} data-conferencia={emConferencia || undefined}>
       <header className={estilos.cabecalho}>
         <p className={estilos.original} title={doc.nomeOriginal}>
           {doc.nomeOriginal}
         </p>
-        {data?.status === 'concluido' && (
-          <span className={estilos.tipo}>{rotuloTipo(data.tipo_documento)}</span>
+        {lido && (
+          <span className={estilos.chips}>
+            {emConferencia && (
+              <span className={estilos.chipConferencia}>Aguardando conferência</span>
+            )}
+            <span className={estilos.tipo}>{rotuloTipo(lido.tipo_documento)}</span>
+          </span>
         )}
       </header>
 
@@ -56,16 +71,35 @@ export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
         </div>
       )}
 
-      {data?.status === 'concluido' && (
+      {lido && (
         <>
+          {emConferencia && (
+            <p className={estilos.conferencia} role="status">
+              A leitura ficou incerta em{' '}
+              <strong>
+                {data.campos_incertos.map(rotuloCampo).join(', ')}
+              </strong>
+              . Este documento não entra como pronto — fica para conferência
+              humana revisar.
+            </p>
+          )}
+
           <dl className={estilos.campos}>
-            {Object.entries(data.campos).map(([chave, campo]) => (
-              <CampoExtraido key={chave} chave={chave} campo={campo} />
+            {Object.entries(lido.campos).map(([chave, campo]) => (
+              <CampoExtraido
+                key={chave}
+                chave={chave}
+                campo={campo}
+                revisar={incertos.has(chave)}
+              />
             ))}
           </dl>
+
           <div className={estilos.nomeSugerido}>
-            <span className={estilos.rotuloNome}>Nome padronizado do arquivo</span>
-            <code className={estilos.codigoNome}>{data.nome_sugerido}</code>
+            <span className={estilos.rotuloNome}>
+              Nome padronizado do arquivo{emConferencia ? ' (proposto)' : ''}
+            </span>
+            <code className={estilos.codigoNome}>{lido.nome_sugerido}</code>
             <span className={estilos.trocaNome}>
               substitui <span className={estilos.riscado}>{doc.nomeOriginal}</span>
             </span>

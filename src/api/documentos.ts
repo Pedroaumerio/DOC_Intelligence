@@ -32,7 +32,8 @@ export function documentoQuery(id: string) {
     // Poll enquanto o fornecedor não devolveu (5–40 s); para ao concluir/falhar.
     refetchInterval: (query) => {
       const status = query.state.data?.status
-      return status === 'concluido' || status === 'falhou' ? false : intervaloPollMs
+      // para de pollar em qualquer estado terminal
+      return status === 'processando' || status === undefined ? intervaloPollMs : false
     },
     // Pausa em aba sem foco: 800 documentos entre 9h e 11h, cada aba multiplica.
     refetchIntervalInBackground: false,

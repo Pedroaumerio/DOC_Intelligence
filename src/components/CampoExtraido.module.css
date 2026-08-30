@@ -2,12 +2,23 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 2px;
-  padding: 12px 0;
+  padding: 12px 0 12px 12px;
+  margin-left: -12px;
   border-bottom: 1px solid var(--linha);
+  border-left: 2px solid transparent;
 }
 
 .raiz:last-child {
   border-bottom: 0;
+}
+
+.raiz[data-revisar] {
+  border-left-color: var(--conf-baixa);
+}
+
+.marca {
+  color: var(--conf-baixa);
+  font-weight: 600;
 }
 
 .rotulo {

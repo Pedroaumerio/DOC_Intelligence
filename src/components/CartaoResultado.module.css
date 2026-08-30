@@ -6,6 +6,10 @@
   box-shadow: var(--sombra);
 }
 
+.cartao[data-conferencia] {
+  border-color: color-mix(in srgb, var(--conf-baixa) 45%, transparent);
+}
+
 .cabecalho {
   display: flex;
   align-items: flex-start;
@@ -25,8 +29,15 @@
   max-width: 60%;
 }
 
-.tipo {
+.chips {
   flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.tipo {
   font-family: var(--fonte-titulo);
   font-weight: 600;
   font-size: 0.9rem;
@@ -37,9 +48,36 @@
   padding: 4px 12px;
 }
 
+.chipConferencia {
+  font-family: var(--fonte-secundaria);
+  font-weight: 600;
+  font-size: 0.74rem;
+  color: var(--conf-baixa);
+  background: color-mix(in srgb, var(--conf-baixa) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--conf-baixa) 45%, transparent);
+  border-radius: 999px;
+  padding: 4px 10px;
+  align-self: center;
+}
+
 .campos {
   margin: 0;
   padding: 4px 0 0;
+}
+
+.conferencia {
+  margin: 14px 0 4px;
+  padding: 12px 14px;
+  border-radius: var(--raio-sm);
+  border-left: 3px solid var(--conf-baixa);
+  background: color-mix(in srgb, var(--conf-baixa) 10%, transparent);
+  font-size: 0.9rem;
+  color: var(--texto-claro);
+  max-width: 52ch;
+}
+
+.conferencia strong {
+  color: var(--conf-baixa);
 }
 
 .falha {

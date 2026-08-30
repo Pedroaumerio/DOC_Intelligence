@@ -38,8 +38,9 @@ gasta outra chamada de processamento e devolve o `id` que já existia.
 ## `GET /documentos/:id`
 
 Estado atual de um documento. O app faz *poll* deste endpoint a cada 3 s
-enquanto o `status` for `processando`; para ao chegar em `concluido` ou `falhou`.
-O poll pausa quando a aba perde o foco (fato e).
+enquanto o `status` for `processando`; para em qualquer estado terminal
+(`concluido`, `aguardando_conferencia`, `falhou`). O poll pausa quando a aba
+perde o foco (fato e).
 
 **Enquanto processa**
 
@@ -81,6 +82,29 @@ tela renderiza o que vier. Exemplos:
 
 Datas vêm em ISO (`aaaa-mm-dd`); o front exibe `dd/mm/aaaa`.
 
+**Aguardando conferência** — a máquina não teve confiança suficiente
+
+Quando algum campo fica abaixo do limiar de confiança, o documento **não entra
+como pronto**: volta com `aguardando_conferencia` (mesmo formato do concluído) +
+`campos_incertos`, para a conferência humana revisar (enunciado). A tela mostra o
+resultado, marca os campos incertos e não trata como finalizado.
+
+```json
+{
+  "id": "doc_...",
+  "status": "aguardando_conferencia",
+  "recebido_em": "2026-08-30T14:00:00.000Z",
+  "tipo_documento": "contrato",
+  "nome_sugerido": "contrato_maria-de-fatima-sales_2026-08-30.pdf",
+  "campos": {
+    "contratante": { "valor": "Maria de Fátima Sales", "confianca": 0.91 },
+    "contratada":  { "valor": "Lamarck Sociedade de Advogados", "confianca": 0.21 },
+    "objeto":      { "valor": "Patrocínio em ação de inventário", "confianca": 0.82 }
+  },
+  "campos_incertos": ["contratada"]
+}
+```
+
 **Falhou**
 
 ```json
@@ -111,8 +135,9 @@ dados são fictícios. A classificação/extração é a função em
 - devolve um de vários documentos fictícios — identidade, contracheque, carteira
   de trabalho, laudo, procuração, contrato — cada um com o seu conjunto de campos
   (o #0 é o exemplo do enunciado, "João da Silva"). Estável por documento;
-- varia a confiança de cada campo e às vezes derruba um campo de propósito, para
-  que a próxima fatia (conferência humana) tenha o caso de baixa confiança.
+- varia a confiança de cada campo e às vezes derruba um campo de propósito
+  (`probQuedaCampo`); quando algum campo fica abaixo de `limiarConferencia`
+  (0,55), o documento volta como `aguardando_conferencia` em vez de `concluido`.
 
 Os testes zeram latência e aleatoriedade e fixam o documento via
 `configurarDuble({ indiceDocumento })`.

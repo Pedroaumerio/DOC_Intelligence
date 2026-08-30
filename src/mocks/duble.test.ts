@@ -1,5 +1,10 @@
 import { afterEach, expect, test } from 'vitest'
-import { classificarDocumento, configurarDuble, resetarDuble } from './duble'
+import {
+  classificarDocumento,
+  configurarDuble,
+  resetarDuble,
+  resultadoLeitura,
+} from './duble'
 
 afterEach(resetarDuble)
 
@@ -47,6 +52,29 @@ test('o mesmo documento cai sempre no mesmo modelo', () => {
   const a = classificarDocumento('x.pdf', 'doc_abc').tipo_documento
   const b = classificarDocumento('x.pdf', 'doc_abc').tipo_documento
   expect(a).toBe(b)
+})
+
+test('leitura confiável entra como "concluido"', () => {
+  configurarDuble({ indiceDocumento: 0, probQuedaCampo: 0 })
+  const r = resultadoLeitura('doc_x', '2026-08-30T00:00:00Z', 'rg.jpg')
+  expect(r.status).toBe('concluido')
+  expect('campos_incertos' in r).toBe(false)
+})
+
+test('campo abaixo do limiar segura o documento para conferência humana', () => {
+  configurarDuble({ indiceDocumento: 0, probQuedaCampo: 1 }) // sempre derruba um campo
+  const r = resultadoLeitura('doc_y', '2026-08-30T00:00:00Z', 'rg.jpg')
+
+  expect(r.status).toBe('aguardando_conferencia')
+  if (r.status !== 'aguardando_conferencia') throw new Error('esperava conferência')
+  expect(r.campos_incertos.length).toBeGreaterThan(0)
+  // o(s) campo(s) incerto(s) estão de fato abaixo de 0.55
+  for (const chave of r.campos_incertos) {
+    expect(r.campos[chave]!.confianca).toBeLessThan(0.55)
+  }
+  // e ainda assim vem com tipo, campos e nome sugerido (proposto)
+  expect(r.tipo_documento).toBe('identidade')
+  expect(r.nome_sugerido).toContain('identidade_')
 })
 
 // helpers -------------------------------------------------------------

@@ -16,6 +16,7 @@
  */
 import type {
   CamposExtraidos,
+  DocumentoAguardandoConferencia,
   DocumentoConcluido,
   DocumentoFalhou,
   TipoDocumento,
@@ -30,6 +31,9 @@ export interface ConfigDuble {
   probFalha: number
   /** Probabilidade de um campo voltar com confiança baixa de propósito. */
   probQuedaCampo: number
+  /** Abaixo disto, o campo é "incerto" e o documento vai para conferência humana
+   * em vez de entrar como pronto. */
+  limiarConferencia: number
   /** Fixa o documento fictício (índice do pool). null = sorteia pelo id do doc. */
   indiceDocumento: number | null
 }
@@ -39,6 +43,7 @@ export const configPadrao: ConfigDuble = {
   latenciaMaxMs: 18_000,
   probFalha: 0.12,
   probQuedaCampo: 0.4,
+  limiarConferencia: 0.55,
   indiceDocumento: null,
 }
 
@@ -329,17 +334,25 @@ function extensao(nome: string): string {
   return m ? m[0].toLowerCase() : ''
 }
 
-export function resultadoConcluido(
+/**
+ * Resultado da leitura. Se algum campo ficou abaixo do limiar de confiança, o
+ * documento NÃO entra como pronto: volta com `aguardando_conferencia` e a lista
+ * de campos incertos, para a conferência humana corrigir (enunciado).
+ */
+export function resultadoLeitura(
   id: string,
   recebidoEm: string,
   nomeOriginal: string,
-): DocumentoConcluido {
-  return {
-    id,
-    recebido_em: recebidoEm,
-    status: 'concluido',
-    ...classificarDocumento(nomeOriginal, id),
-  }
+): DocumentoConcluido | DocumentoAguardandoConferencia {
+  const lido = classificarDocumento(nomeOriginal, id)
+  const camposIncertos = Object.entries(lido.campos)
+    .filter(([, c]) => c.confianca < config.limiarConferencia)
+    .map(([chave]) => chave)
+
+  const base = { id, recebido_em: recebidoEm, ...lido }
+  return camposIncertos.length > 0
+    ? { ...base, status: 'aguardando_conferencia', campos_incertos: camposIncertos }
+    : { ...base, status: 'concluido' }
 }
 
 export function resultadoFalhou(id: string, recebidoEm: string): DocumentoFalhou {
