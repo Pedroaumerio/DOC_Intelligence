@@ -3,6 +3,46 @@
 Interface de atendimento para triagem, acompanhamento e conferência humana de
 documentos processados por um modelo multimodal de terceiro.
 
+## Como rodar
+
+### Pré-requisitos
+
+- **Node.js 20.19+ ou 22.12+** (testado no Node 24). Vem com o `npm`.
+- **Git** (para clonar).
+
+Não precisa de back-end, banco de dados nem variáveis de ambiente. A API é
+simulada no navegador pelo [MSW](https://mswjs.io/): as chamadas de rede são
+interceptadas e um mock devolve dados fictícios (ver
+[`docs/contrato-api.md`](docs/contrato-api.md)). Um acervo de ~24 documentos
+fictícios é semeado sozinho a cada carga da página.
+
+### Passo a passo
+
+```bash
+# 1. clonar
+git clone https://github.com/Pedroaumerio/DOC_Intelligence.git
+cd DOC_Intelligence
+
+# 2. instalar as dependências (lê o package.json / package-lock.json)
+npm install
+
+# 3. subir o servidor de desenvolvimento
+npm run dev
+```
+
+Abra **http://localhost:5173**. O app cai em `/adicionar`; solte um arquivo
+qualquer (jpg/png/pdf), clique em enviar e acompanhe em "Resultados"; "Processados"
+já vem com o acervo.
+
+Para conferir a build de produção:
+
+```bash
+npm run build     # gera dist/
+npm run preview    # serve dist/ em http://localhost:4173
+```
+
+Verificações (opcional): `npm test`, `npm run typecheck`, `npm run lint`.
+
 ## Fatias implementadas
 
 Comportamentos 1–3 do produto-alvo: receber, devolver o resultado e consultar/listar.
@@ -22,8 +62,12 @@ Recortes em [`docs/fatia-atual.md`](docs/fatia-atual.md) (recebimento) e
   fictício + sessão), `GET /documentos` paginado. Busca por nome do arquivo,
   titular, tipo ou qualquer valor de campo lido. Filtro por status. Clicar numa
   linha expande o resultado ali mesmo.
+- **Conferência**: documento com pendência (`aguardando_conferencia`) tem
+  "Conferir e corrigir" — a pessoa ajusta os campos e ele passa a pronto
+  (`PATCH /documentos/:id`).
 
-**Fora destas fatias:** fila de conferência, `claim`, correção de campo.
+**Fora destas fatias:** fila de conferência com `claim` (duas conferentes ao
+mesmo tempo, conflito `409`); visualizador do documento (zoom/rotação).
 
 ## Stack
 
@@ -41,6 +85,35 @@ Recortes em [`docs/fatia-atual.md`](docs/fatia-atual.md) (recebimento) e
 Estado de servidor fica no TanStack Query; o pouco estado de aplicação (fila de
 upload, documentos enviados na sessão) é local, em `useState`/`useReducer` e um
 contexto de sessão. Não há store global.
+
+## Dependências
+
+`npm install` instala tudo a partir do `package.json`. As versões exatas ficam no
+`package-lock.json`.
+
+**Runtime** (`dependencies`):
+
+| Pacote | Para quê |
+|---|---|
+| `react`, `react-dom` | UI |
+| `@tanstack/react-query` | cache, polling, retry e estados de carregamento/erro |
+| `react-router-dom` | rotas (Adicionar / Resultados / Processados) |
+
+**Desenvolvimento / build / teste** (`devDependencies`):
+
+| Pacote | Para quê |
+|---|---|
+| `vite`, `@vitejs/plugin-react` | dev server e build |
+| `typescript`, `@types/*` | tipos (`strict`) |
+| `msw` | mock da API no nível de rede (browser + node) |
+| `vitest`, `@vitest/coverage-v8`, `jsdom` | testes |
+| `@testing-library/react` · `/dom` · `/jest-dom` · `/user-event` | testes de comportamento |
+| `oxlint` | lint |
+
+Nenhuma dependência de runtime além das três acima — decisão de projeto
+(ADR-0001 §5): cada pacote num app que exibe RG e contracheque é superfície de
+ataque. Fontes (`Sora`, `Poppins`) vêm do Google Fonts via `<link>` no
+`index.html`; sem internet, cai no fallback do sistema.
 
 ## Scripts
 
