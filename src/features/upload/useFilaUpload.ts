@@ -7,6 +7,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useEnviarDocumento } from '../../api/documentos'
+import { formatoAceito, ROTULO_FORMATOS } from '../../lib/formatosAceitos'
 import { hashArquivo } from '../../lib/hash'
 import { useSessionDocumentos } from '../../session/SessionDocumentos'
 
@@ -30,7 +31,6 @@ export interface ItemFila {
 }
 
 const CONCORRENCIA_MAX = 3
-const TIPOS_ACEITOS = ['image/jpeg', 'image/png', 'image/heic', 'application/pdf']
 
 let contador = 0
 const novoIdLocal = () => `f${++contador}`
@@ -59,16 +59,14 @@ export function useFilaUpload() {
     (arquivos: FileList | File[]) => {
       const novos: ItemFila[] = []
       for (const arquivo of Array.from(arquivos)) {
-        const aceito =
-          TIPOS_ACEITOS.includes(arquivo.type) ||
-          /\.(jpe?g|png|heic|pdf)$/i.test(arquivo.name)
+        const aceito = formatoAceito(arquivo)
         novos.push({
           idLocal: novoIdLocal(),
           arquivo,
           nome: arquivo.name,
           tamanho: arquivo.size,
           status: aceito ? 'lendo' : 'falhou',
-          erro: aceito ? undefined : 'Formato não aceito. Use JPG, PNG, HEIC ou PDF.',
+          erro: aceito ? undefined : `Formato não aceito. Use ${ROTULO_FORMATOS}.`,
         })
       }
       setItens((atual) => [...atual, ...novos])

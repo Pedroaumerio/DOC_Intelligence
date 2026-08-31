@@ -116,6 +116,20 @@
   border-radius: var(--raio-sm);
 }
 
+.texto {
+  align-self: stretch;
+  justify-self: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 8px 4px;
+  font-family: var(--fonte-secundaria), monospace;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--texto-claro);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 .semPreview {
   max-width: 42ch;
   text-align: center;

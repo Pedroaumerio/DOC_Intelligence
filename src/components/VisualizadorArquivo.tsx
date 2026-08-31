@@ -3,14 +3,17 @@ import estilos from './VisualizadorArquivo.module.css'
 
 /**
  * Mostra o arquivo que a pessoa enviou nesta sessão, sem que ela precise ir
- * procurar no dispositivo de novo. O `File` fica em memória na sessão (não é
- * persistido — fato d); aqui viramos uma object URL só enquanto o modal está
- * aberto e a revogamos ao fechar.
+ * procurar no dispositivo de novo. O `File` fica na sessão (memória +
+ * sessionStorage — fato d); aqui viramos uma object URL só enquanto o modal
+ * está aberto e a revogamos ao fechar.
  *
- * Imagem: `<img>` com girar (fato b — foto torta) e alternar ajuste/tamanho real.
- * PDF: `<iframe>` com o leitor nativo do navegador.
- * Outros formatos (ex.: HEIC, que a maioria dos navegadores não desenha):
- * mensagem honesta em vez de um quadro quebrado.
+ * O que dá para pré-visualizar sem trazer dependência (ADR-0001 §5):
+ * - imagem → `<img>` com girar (fato b — foto torta) e alternar ajuste/tamanho real;
+ * - PDF → `<iframe>` com o leitor nativo do navegador;
+ * - texto (.txt) → o conteúdo em `<pre>`.
+ * O resto (DOC/DOCX/ODT/RTF/TIFF/HEIC) o navegador não abre sozinho — aviso
+ * honesto em vez de um quadro quebrado; o arquivo segue guardado para reabrir
+ * no aplicativo certo.
  *
  * Overlay próprio (não `<dialog>`): mais previsível entre navegadores e não
  * depende de `showModal()`, que sob o StrictMode pode falhar dentro de um efeito.
@@ -24,7 +27,18 @@ export function VisualizadorArquivo({
   nome: string
   onFechar: () => void
 }) {
+  const ehTexto = arquivo.type === 'text/plain' || /\.txt$/i.test(nome)
+  const ehHeic = /\.(heic|heif)$/i.test(nome) || /^image\/hei[cf]$/.test(arquivo.type)
+  const ehTiff = /\.tiff?$/i.test(nome) || arquivo.type === 'image/tiff'
+  const ehImagem =
+    !ehHeic &&
+    !ehTiff &&
+    (/^image\//.test(arquivo.type) ||
+      (!arquivo.type && /\.(jpe?g|png|webp|gif|avif|bmp|svg)$/i.test(nome)))
+  const ehPdf = arquivo.type === 'application/pdf' || /\.pdf$/i.test(nome)
+
   const [url, setUrl] = useState('')
+  const [texto, setTexto] = useState<string | null>(null)
   const [giro, setGiro] = useState(0)
   const [tamanhoReal, setTamanhoReal] = useState(false)
   const [falhouImagem, setFalhouImagem] = useState(false)
@@ -41,6 +55,17 @@ export function VisualizadorArquivo({
   }, [arquivo])
 
   useEffect(() => {
+    if (!ehTexto) return
+    let vivo = true
+    void arquivo.text().then((t) => {
+      if (vivo) setTexto(t.slice(0, 200_000))
+    })
+    return () => {
+      vivo = false
+    }
+  }, [arquivo, ehTexto])
+
+  useEffect(() => {
     const aoTeclar = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onFechar()
     }
@@ -53,12 +78,6 @@ export function VisualizadorArquivo({
     }
   }, [onFechar])
 
-  const ehHeic = /\.(heic|heif)$/i.test(nome) || /^image\/hei[cf]$/.test(arquivo.type)
-  const ehImagem =
-    !ehHeic &&
-    (/^image\//.test(arquivo.type) ||
-      (!arquivo.type && /\.(jpe?g|png|webp|gif|avif|bmp|svg)$/i.test(nome)))
-  const ehPdf = arquivo.type === 'application/pdf' || /\.pdf$/i.test(nome)
   const mostraImagem = ehImagem && !falhouImagem
 
   return (
@@ -107,7 +126,7 @@ export function VisualizadorArquivo({
           </div>
         </header>
 
-        <div className={estilos.area} data-scroll={tamanhoReal || undefined}>
+        <div className={estilos.area} data-scroll={(tamanhoReal || ehTexto) || undefined}>
           {url && mostraImagem && (
             <img
               src={url}
@@ -118,14 +137,15 @@ export function VisualizadorArquivo({
               onError={() => setFalhouImagem(true)}
             />
           )}
-          {url && !mostraImagem && ehPdf && (
+          {!mostraImagem && ehTexto && <pre className={estilos.texto}>{texto}</pre>}
+          {url && !mostraImagem && !ehTexto && ehPdf && (
             <iframe src={url} title={`Arquivo enviado: ${nome}`} className={estilos.pdf} />
           )}
-          {url && !mostraImagem && !ehPdf && (
+          {!mostraImagem && !ehTexto && !ehPdf && (
             <p className={estilos.semPreview}>
               Não dá para pré-visualizar <strong>{nome}</strong> aqui
-              {arquivo.type ? ` (formato ${arquivo.type})` : ''}. O arquivo continua
-              guardado nesta sessão.
+              {arquivo.type ? ` (formato ${arquivo.type})` : ''} — abra no aplicativo
+              próprio para esse tipo de arquivo. Ele continua guardado nesta sessão.
             </p>
           )}
         </div>

@@ -19,7 +19,7 @@ Não existe ainda "lista de todos os processados" nem busca por nome — a seç�
 
 | Elemento | Comportamento |
 |---|---|
-| Área de soltar/selecionar arquivo | Aceita imagem (jpg/png/heic) e PDF; múltiplos arquivos de uma vez |
+| Área de soltar/selecionar arquivo | Aceita imagem (JPG/PNG/WEBP/HEIC/TIFF), PDF e documento (DOC/DOCX/ODT/RTF/TXT); múltiplos arquivos de uma vez. Formatos numa fonte única — `src/lib/formatosAceitos.ts` |
 | Cada arquivo, ao entrar na lista | Calcula hash SHA-256 no navegador antes de subir (fato c do ambiente — evita pagar de novo pelo que já foi enviado) |
 | Estado por arquivo | `pronto para enviar` → `enviando` → `processando` → `concluído` / `falhou` |
 | Enviar | Dispara `POST /documentos`; a resposta é só um identificador — o processamento é assíncrono, a tela não trava esperando os 5–40 s do fornecedor |

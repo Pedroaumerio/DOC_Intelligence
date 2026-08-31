@@ -1,7 +1,6 @@
 import { useId, useRef, useState } from 'react'
+import { ACCEPT_ARQUIVOS, ROTULO_FORMATOS } from '../lib/formatosAceitos'
 import estilos from './Dropzone.module.css'
-
-const ACCEPT = 'image/jpeg,image/png,image/heic,.heic,application/pdf'
 
 export function Dropzone({
   onArquivos,
@@ -43,7 +42,7 @@ export function Dropzone({
         ref={inputRef}
         type="file"
         multiple
-        accept={ACCEPT}
+        accept={ACCEPT_ARQUIVOS}
         className="sr-only"
         tabIndex={-1}
         onChange={(e) => {
@@ -53,8 +52,8 @@ export function Dropzone({
       />
       <p className={estilos.titulo}>Solte os documentos aqui</p>
       <p id={descricaoId} className={estilos.ajuda}>
-        ou clique para escolher os arquivos. Aceita JPG, PNG, HEIC e PDF — vários
-        de uma vez.
+        ou clique para escolher os arquivos. Aceita {ROTULO_FORMATOS} — vários de
+        uma vez.
       </p>
     </div>
   )

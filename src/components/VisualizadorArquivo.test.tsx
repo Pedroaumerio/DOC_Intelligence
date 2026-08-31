@@ -58,3 +58,33 @@ test('PDF vai para um iframe com o leitor do navegador', () => {
   expect(frame.tagName).toBe('IFRAME')
   expect(frame.getAttribute('src')).toMatch(/^blob:/)
 })
+
+test('.txt aparece com o conteúdo em texto', async () => {
+  render(
+    <VisualizadorArquivo
+      arquivo={new File(['petição — rascunho\nsegunda linha'], 'rascunho.txt', {
+        type: 'text/plain',
+      })}
+      nome="rascunho.txt"
+      onFechar={vi.fn()}
+    />,
+  )
+
+  expect(await screen.findByText(/petição — rascunho/)).toBeInTheDocument()
+  expect(screen.queryByRole('img')).not.toBeInTheDocument()
+})
+
+test('.docx cai no aviso de abrir no aplicativo próprio', () => {
+  render(
+    <VisualizadorArquivo
+      arquivo={new File(['PK'], 'procuracao.docx', {
+        type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      })}
+      nome="procuracao.docx"
+      onFechar={vi.fn()}
+    />,
+  )
+
+  expect(screen.getByText(/não dá para pré-visualizar/i)).toBeInTheDocument()
+  expect(screen.getByText(/aplicativo próprio/i)).toBeInTheDocument()
+})

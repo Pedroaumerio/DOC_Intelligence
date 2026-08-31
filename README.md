@@ -31,8 +31,8 @@ npm run dev
 ```
 
 Abra **http://localhost:5173**. O app cai em `/adicionar`; solte um arquivo
-qualquer (jpg/png/pdf), clique em enviar e acompanhe em "Resultados"; "Processados"
-já vem com o acervo.
+qualquer (imagem, PDF ou DOC/DOCX), clique em enviar e acompanhe em "Resultados";
+"Processados" já vem com o acervo.
 
 Para conferir a build de produção:
 
@@ -49,10 +49,11 @@ Comportamentos 1–3 do produto-alvo: receber, devolver o resultado e consultar/
 Recortes em [`docs/fatia-atual.md`](docs/fatia-atual.md) (recebimento) e
 [`docs/fatia-busca.md`](docs/fatia-busca.md) (busca).
 
-- **Adicionar documento** (`/adicionar`): solta um ou mais arquivos (jpg/png/heic/pdf),
-  cada um tem o SHA-256 calculado no navegador e é conferido contra o que já foi
-  enviado nesta sessão antes de subir. O envio dispara `POST /documentos` e não
-  trava a tela.
+- **Adicionar documento** (`/adicionar`): solta um ou mais arquivos — imagem
+  (JPG/PNG/WEBP/HEIC/TIFF), PDF ou documento (DOC/DOCX/ODT/RTF/TXT), lista em
+  [`src/lib/formatosAceitos.ts`](src/lib/formatosAceitos.ts). Cada um tem o
+  SHA-256 calculado no navegador e é conferido contra o que já foi enviado nesta
+  sessão antes de subir. O envio dispara `POST /documentos` e não trava a tela.
 - **Resultados** (`/resultado`): visão ao vivo do que você enviou nesta sessão —
   faz *poll* de `GET /documentos/:id` (pausa em aba sem foco), mostra tipo, campos
   com confiança individual, nome padronizado. Espera explícita durante o

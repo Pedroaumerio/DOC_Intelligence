@@ -59,7 +59,7 @@ fornecedor (5–40 s, e às vezes falha) segue assíncrono.
 
 | Campo | Tipo | Descrição |
 |---|---|---|
-| `arquivo` | arquivo | Imagem (jpg/png/heic) ou PDF |
+| `arquivo` | arquivo | Imagem (jpg/png/webp/heic/tiff), PDF ou documento (doc/docx/odt/rtf/txt). Validação de entrada no cliente — `src/lib/formatosAceitos.ts`; o dublê não olha o conteúdo |
 | `hash` | string | SHA-256 hex do conteúdo, calculado no navegador antes de subir (fato c) |
 | `nome_original` | string | Nome do arquivo como veio do dispositivo do atendimento |
 
