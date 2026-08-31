@@ -15,6 +15,17 @@ JSON são aproximados (valores dos campos e trechos de `texto_reconhecido`).
 `[imagem anexada]` e `[interrompeu a resposta do agente]` marcam anexos e
 interrupções.
 
+**Nota de privacidade:** as imagens anexadas em `10` e `11` eram fotos reais de
+um documento de identidade (usadas para testar a leitura antes de o OCR ser
+abandonado — ver `docs/prompts.md`, "Onde o agente errou"). A descrição do
+anexo foi generalizada nesses dois arquivos. Em `12`, o OCR chegou a
+reconhecer um nome real de pessoa física dentro do ruído da leitura errada;
+esse trecho foi redigido. O enunciado veda dado real de pessoa física no
+repositório — essas são as únicas edições de conteúdo neste diretório; o
+resto é cópia literal. O mesmo nome real também tinha sido copiado, sem essa
+ligação ter sido percebida na hora, para dentro de `src/mocks/duble.ts` como
+um titular "fictício" — já corrigido lá e em `docs/contrato-api.md`.
+
 ## Índice
 
 | # | Assunto |

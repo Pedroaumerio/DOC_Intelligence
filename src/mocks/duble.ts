@@ -174,7 +174,7 @@ const POOL: DocumentoFicticio[] = [
   {
     tipo_documento: 'procuracao',
     campos: {
-      outorgante: 'Francisco Aumério Nogueira Vieira',
+      outorgante: 'Renato Barbalho de Siqueira',
       outorgado: 'Lamarck Sociedade de Advogados',
       finalidade: 'Representação em ação trabalhista',
       tabeliao: '2º Tabelionato de Notas de Mossoró/RN',

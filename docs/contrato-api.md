@@ -30,9 +30,9 @@ Ordenado por `recebido_em` decrescente.
     {
       "id": "doc_...",
       "nome_original": "WhatsApp Image 2026-08-18 at 09.14.22.jpeg",
-      "nome_sugerido": "procuracao_francisco-aumerio-nogueira-vieira_2026-08-30.jpeg",
+      "nome_sugerido": "procuracao_renato-barbalho-de-siqueira_2026-08-30.jpeg",
       "tipo_documento": "procuracao",
-      "titular": "Francisco Aumério Nogueira Vieira",
+      "titular": "Renato Barbalho de Siqueira",
       "status": "concluido",
       "recebido_em": "2026-08-30T09:14:22.000Z"
     }
