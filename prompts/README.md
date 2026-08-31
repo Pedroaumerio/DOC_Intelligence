@@ -33,8 +33,8 @@ JSON são aproximados (valores dos campos e trechos de `texto_reconhecido`).
 interrupções.
 
 **Nota de privacidade:** as imagens anexadas em `10` e `11` eram fotos reais de
-um documento de identidade (usadas para testar a leitura antes de o OCR ser
-abandonado — ver "Onde o agente errou", acima). A descrição do anexo foi
+um documento de identidade (usadas para testar a leitura do OCR,
+ver "Onde o agente errou", acima). A descrição do anexo foi
 generalizada nesses dois arquivos. Em `12`, o OCR chegou a reconhecer um nome
 real de pessoa física dentro do ruído da leitura errada; esse trecho foi
 redigido. O enunciado veda dado real de pessoa física no repositório — essas são
