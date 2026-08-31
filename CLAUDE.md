@@ -13,6 +13,8 @@ deploy nem autenticação real na entrega.
 - `docs/fatia-busca.md` — recorte 2: listar/consultar os processados + conferência.
 - `docs/contrato-api.md` — o contrato da API (endpoints, payloads).
 - `prompts/` — todos os prompts na íntegra, em ordem, e "Onde o agente errou".
+- `.claude/skills/` — skills do Claude Code configuradas para o projeto (ver o
+  README de lá; disponíveis, mas não invocadas na construção).
 
 ## Regra que não pode ser esquecida
 
