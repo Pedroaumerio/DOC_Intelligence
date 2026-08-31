@@ -1,0 +1,4 @@
+# As skills do Claude Code são conteúdo de terceiro versionado apenas para
+# reproduzir o setup do projeto (ver .claude/skills/README.md). Não são código
+# da aplicação — o GitHub Linguist as ignora nas estatísticas de linguagem.
+.claude/skills/** linguist-vendored
