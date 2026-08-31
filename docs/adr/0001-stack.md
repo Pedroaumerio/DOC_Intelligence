@@ -131,3 +131,32 @@ Registrado aqui para não parecer esquecimento:
 - **Storybook** — a interface é pequena demais para justificar a manutenção do catálogo.
 - **Biblioteca de componentes pronta** — a tela tem poucos componentes e um deles (o visualizador de documento ao lado dos campos) seria escrito à mão de qualquer jeito.
 - **Virtualização de listas** — 800 documentos num dia de pico, mas nunca 800 numa tela; a lista é paginada pela API. Fica anotado como o primeiro lugar a olhar se a paginação não segurar.
+
+---
+
+## 7. Ideias registradas para depois
+
+### Login individual por profissional, com escopo dos próprios clientes
+
+Outra proposta era disponibilizar **login individual para cada profissional do
+atendimento** e, a partir disso, **filtrar e buscar apenas os seus próprios
+clientes** — cada pessoa vê o seu recorte do acervo, não o do escritório inteiro.
+
+A funcionalidade não avançou nesta etapa para evitar a complexidade extra de
+autenticação (sessão, expiração, recuperação, papéis) — bloco que o enunciado
+tira do escopo e não caberia no prazo — e fica **pendente de validação com o
+time**: ainda não está claro se o escritório quer essa parede entre profissionais
+ou se o modelo é "todo mundo vê tudo, cada um trabalha o seu".
+
+Onde isso encosta nos fatos do ambiente:
+
+- **Fato (d)** — escopo por profissional é menor privilégio na prática: quem não
+  precisa ver o documento do cliente de outra pessoa não vê.
+- **Fato (g)** — login individual é pré-requisito do `claim` da fila de
+  conferência; sem saber *quem* pegou o item, o `409` de conflito não tem a quem
+  atribuir. A UI hoje já assume um usuário identificado (§6) — esta ideia é o
+  passo seguinte, transformando essa identidade em filtro de dados.
+
+No contrato, isso significaria `GET /documentos` ganhar um recorte por profissional
+**no servidor** (não um filtro do cliente, que ainda traria os dados na resposta)
+e o documento passar a carregar o profissional responsável.
