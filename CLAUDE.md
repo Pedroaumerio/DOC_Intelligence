@@ -12,7 +12,7 @@ deploy nem autenticação real na entrega.
 - `docs/fatia-atual.md` — recorte 1: receber o documento e devolver o resultado.
 - `docs/fatia-busca.md` — recorte 2: listar/consultar os processados + conferência.
 - `docs/contrato-api.md` — o contrato da API (endpoints, payloads).
-- `docs/prompts.md` — os pedidos que conduziram o projeto, em ordem.
+- `prompts/` — todos os prompts na íntegra, em ordem, e "Onde o agente errou".
 
 ## Regra que não pode ser esquecida
 

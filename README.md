@@ -154,6 +154,7 @@ src/
   test/setup.ts  test/utils.tsx
 docs/
   adr/0001-stack.md   fatia-atual.md   fatia-busca.md   contrato-api.md
+prompts/              # todos os prompts na íntegra + "Onde o agente errou"
 ```
 
 ## Testes
@@ -174,3 +175,11 @@ Tokens da Lamarck Advogados em [`src/index.css`](src/index.css). O âmbar da mar
 (`--acento`) fica reservado para ação primária, logo e foco; os estados de
 confiança/processamento usam uma paleta semântica separada
 (verde/neutro/vermelho), de propósito.
+
+## Rastreabilidade
+
+- Decisões de stack: [`docs/adr/0001-stack.md`](docs/adr/0001-stack.md).
+- Todos os prompts na íntegra, um arquivo por mensagem, em ordem:
+  [`prompts/`](prompts/).
+- **Onde o agente errou / como foi percebido / o que foi feito**:
+  [`prompts/README.md`](prompts/README.md).
