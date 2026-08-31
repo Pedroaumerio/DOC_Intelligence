@@ -162,7 +162,7 @@ prompts/              # todos os prompts na íntegra + "Onde o agente errou"
 Poucos, nos pontos onde uma regressão silenciosa custaria caro (ADR-0001 §3):
 
 - `src/lib/hash.test.ts` — hash estável por conteúdo.
-- `src/features/upload/useFilaUpload.test.tsx` — detecção de duplicata; rejeição de formato.
+- `src/features/upload/useFilaUpload.test.tsx` — detecção de duplicata; rejeição de formato. (dica tente enviar dois documentos na mesma sessão, vai demonstrar o tratamento de erro)
 - `src/mocks/duble.test.ts` — campos por tipo; confiança baixa segura o documento.
 - `src/components/CartaoResultado.test.tsx` — resultado a partir do schema; conferência; falha + retry.
 - `src/mocks/busca.test.ts` — `GET /documentos` pagina, ordena, filtra por status e por texto.
