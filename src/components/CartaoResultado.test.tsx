@@ -20,7 +20,9 @@ test('mostra o tipo, os cinco campos com confiança e o nome padronizado', async
   render(<CartaoResultado doc={doc} />, { wrapper: Provedores })
 
   // enquanto processa, a espera é explícita — não um spinner genérico
-  expect(screen.getByText(/pode levar até 40 segundos/i)).toBeInTheDocument()
+  expect(
+    screen.getByText(/ainda estamos lendo este documento/i),
+  ).toBeInTheDocument()
 
   expect(await screen.findByText('Identidade (RG)')).toBeInTheDocument()
 

@@ -3,7 +3,8 @@ import estilos from './EsperaProcessando.module.css'
 
 /**
  * Estado de espera do processamento — não um spinner genérico. A pessoa precisa
- * saber que pode levar até 40 s e que a tela atualiza sozinha (§3 do recorte).
+ * saber que a leitura está em andamento e que a tela atualiza sozinha (§3 do
+ * recorte). O contador de segundos dá a noção de quanto já esperou.
  */
 export function EsperaProcessando({ desde }: { desde: string }) {
   const [segundos, setSegundos] = useState(() => decorridos(desde))
@@ -19,8 +20,8 @@ export function EsperaProcessando({ desde }: { desde: string }) {
         <span className={estilos.pulso} />
       </div>
       <p className={estilos.mensagem}>
-        Ainda estamos lendo este documento. Pode levar até 40 segundos — esta tela
-        atualiza sozinha quando terminar.
+        Ainda estamos lendo este documento — esta tela atualiza sozinha quando
+        terminar.
       </p>
       <p className={estilos.tempo}>{segundos}s aguardando o resultado</p>
     </div>
