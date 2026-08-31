@@ -1,4 +1,4 @@
-# Contrato da API — DOC Intelligence
+# Contrato da API (Criada) — DOC Intelligence
 
 > Fonte única de verdade do contrato (ver [ADR-0001](adr/0001-stack.md) §3). Os
 > tipos em [`src/types/contrato.ts`](../src/types/contrato.ts) e os handlers em
