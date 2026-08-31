@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, test } from 'vitest'
 import { configurarDuble } from '../mocks/duble'
@@ -84,6 +84,24 @@ test('conferir e corrigir marca o documento como pronto', async () => {
     expect(screen.queryByText('Aguardando conferência')).not.toBeInTheDocument(),
   )
   expect(screen.getByText('João da Silva Conferido')).toBeInTheDocument()
+})
+
+test('deixa ver o arquivo enviado sem sair da tela de resultados', async () => {
+  const doc = await enviarArquivoFalso('foto do rg.jpeg', 'image/jpeg')
+  render(<CartaoResultado doc={doc} />, { wrapper: Provedores })
+
+  await userEvent.click(
+    screen.getByRole('button', { name: /ver arquivo enviado/i }),
+  )
+
+  const dialogo = await screen.findByRole('dialog')
+  const img = within(dialogo).getByRole('img', { name: /arquivo enviado/i })
+  expect(img.getAttribute('src')).toMatch(/^blob:/)
+
+  await userEvent.click(within(dialogo).getByRole('button', { name: /fechar/i }))
+  await waitFor(() =>
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
+  )
 })
 
 test('falha do fornecedor é humana e permite tentar de novo', async () => {

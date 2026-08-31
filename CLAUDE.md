@@ -63,4 +63,7 @@ npm run build      # typecheck + build de produção
 
 - Fila de conferência com `claim` e conflito `409` (duas conferentes ao mesmo
   tempo — fato g do ambiente).
-- Visualizador do documento (imagem com zoom/rotação ao lado dos campos).
+- Visualizador do documento **lado a lado com os campos**, com zoom/pan de
+  precisão. Existe uma versão simples: em "Resultados", "Ver arquivo enviado"
+  abre o arquivo da sessão num modal (imagem com girar / tamanho real, PDF no
+  leitor do navegador) — ver `src/components/VisualizadorArquivo.tsx`.

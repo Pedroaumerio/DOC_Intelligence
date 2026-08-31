@@ -16,13 +16,20 @@ export function Provedores({ children }: { children: ReactNode }) {
   )
 }
 
-export function arquivoFalso(nome = 'rg.pdf', conteudo = `conteudo-${nome}`): File {
-  return new File([conteudo], nome, { type: 'application/pdf' })
+export function arquivoFalso(
+  nome = 'rg.pdf',
+  conteudo = `conteudo-${nome}`,
+  tipo = 'application/pdf',
+): File {
+  return new File([conteudo], nome, { type: tipo })
 }
 
 /** Envia um arquivo pelo mesmo caminho do app e devolve o que a sessão guardaria. */
-export async function enviarArquivoFalso(nome = 'rg.pdf'): Promise<DocumentoSessao> {
-  const arquivo = arquivoFalso(nome)
+export async function enviarArquivoFalso(
+  nome = 'rg.pdf',
+  tipo = 'application/pdf',
+): Promise<DocumentoSessao> {
+  const arquivo = arquivoFalso(nome, `conteudo-${nome}`, tipo)
   const hash = await hashArquivo(arquivo)
   const form = new FormData()
   form.set('arquivo', arquivo)
