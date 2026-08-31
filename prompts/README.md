@@ -1,8 +1,12 @@
 # prompts/
 
-Todos os prompts desta conversa, **em ordem**, um arquivo por mensagem
-(`NN.md`), como foram escritos — sem correção de digitação, sem reescrita.
-Inclui as mensagens de git ("faça o commit", "de o push") e as perguntas.
+Os prompts desta conversa, **em ordem**, um arquivo por mensagem (`NN.md`), como
+foram escritos — sem correção de digitação, sem reescrita.
+
+`01`–`35` são a primeira parte e incluem as mensagens de git ("faça o commit",
+"de o push") e as perguntas. De `36` em diante ficam só os pedidos técnicos que
+mudaram o projeto — sem "faça o commit"/"de o push" e sem as perguntas de
+esclarecimento no meio.
 
 ## Onde o agente errou
 
@@ -72,3 +76,7 @@ e em `docs/contrato-api.md`.
 | 31–33 | diretório de prompts, ajustes |
 | 34 | README com passo a passo |
 | 35 | este diretório (prompts na íntegra) |
+| 36 | ver o arquivo enviado, sem sair da tela |
+| 37 | mover para "Processados" e corrigir o modal que abria vazio |
+| 38 | persistir o arquivo enviado para reabrir (pedido como localStorage; virou `sessionStorage`) |
+| 39 | aceitar PDF, Word e outros formatos além de imagem |
