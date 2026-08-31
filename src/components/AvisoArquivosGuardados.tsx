@@ -3,9 +3,9 @@ import estilos from './AvisoArquivosGuardados.module.css'
 
 /**
  * Aviso + botão de purga dos arquivos que a sessão guarda em `sessionStorage`
- * (ver ADR-0001 §5, fato d). Aparece em "Resultados" e "Processados" — onde quer
- * que a pessoa veja o que enviou —, para a persistência não ficar invisível e
- * ter um jeito de apagar na hora (a máquina do atendimento é compartilhada).
+ * (ver ADR-0001 §5, fato d). Fica em "Resultados" — a tela dos envios da sessão
+ * —, para a persistência não ficar invisível e ter um jeito de apagar na hora
+ * (a máquina do atendimento é compartilhada).
  */
 export function AvisoArquivosGuardados() {
   const { documentos, limpar } = useSessionDocumentos()

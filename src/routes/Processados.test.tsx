@@ -66,7 +66,7 @@ test('oferece "ver arquivo enviado" só para documento enviado nesta sessão', a
   ).not.toBeInTheDocument()
 })
 
-test('reabre o arquivo depois de recarregar a aba, e "esquecer" apaga', async () => {
+test('reabre o arquivo depois de recarregar a aba (hidrata do sessionStorage)', async () => {
   configurarDuble({ probFalha: 0 })
   const doc = await enviarArquivoFalso('laudo-guardado.jpeg', 'image/jpeg')
   // o que a sessão grava antes de a aba recarregar
@@ -81,11 +81,6 @@ test('reabre o arquivo depois de recarregar a aba, e "esquecer" apaga', async ()
   expect(
     await within(linha).findByRole('button', { name: /ver arquivo enviado/i }),
   ).toBeInTheDocument()
-
-  await userEvent.click(screen.getByRole('button', { name: /esquecer agora/i }))
-  expect(
-    within(linha).queryByRole('button', { name: /ver arquivo enviado/i }),
-  ).not.toBeInTheDocument()
 })
 
 test('clicar num item expande e mostra o resultado', async () => {

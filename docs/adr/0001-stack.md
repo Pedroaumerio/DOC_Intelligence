@@ -126,8 +126,8 @@ contra a foto — sem ter que procurar o arquivo de novo, e recarregar a aba
 apagava tudo. O meio-termo: o **arquivo original** (não os campos extraídos)
 fica em `sessionStorage`, que tem escopo de aba e é apagado quando a aba fecha —
 nunca em `localStorage`, que sobreviveria indefinidamente, nem em servidor. Há um
-botão "Esquecer agora" em "Resultados" e "Processados" para apagar na hora — a
-máquina do atendimento é compartilhada. `sessionStorage`
+botão "Esquecer agora" em "Resultados" para apagar na hora — a máquina do
+atendimento é compartilhada. `sessionStorage`
 tem ~5 MB por origem: acima disso a gravação falha em silêncio e só a
 sobrevivência ao reload é perdida — a sessão em memória continua funcionando.
 Implementação isolada em [`src/session/persistencia.ts`](../../src/session/persistencia.ts).

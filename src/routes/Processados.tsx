@@ -1,6 +1,5 @@
 import { useState } from 'react'
 import { useDocumentos } from '../api/documentos'
-import { AvisoArquivosGuardados } from '../components/AvisoArquivosGuardados'
 import { LinhaProcessado } from '../components/LinhaProcessado'
 import { useDebounce } from '../lib/useDebounce'
 import type { StatusDocumento } from '../types/contrato'
@@ -39,8 +38,6 @@ export function Processados() {
         Todos os documentos já processados. Busque por nome do arquivo, titular,
         tipo ou qualquer campo lido. Clique num item para ver o resultado.
       </p>
-
-      <AvisoArquivosGuardados />
 
       <div className={estilos.filtros}>
         <input
