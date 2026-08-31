@@ -80,3 +80,4 @@ e em `docs/contrato-api.md`.
 | 37 | mover para "Processados" e corrigir o modal que abria vazio |
 | 38 | persistir o arquivo enviado para reabrir (pedido como localStorage; virou `sessionStorage`) |
 | 39 | aceitar PDF, Word e outros formatos além de imagem |
+| 40 | favicon com a identidade Lamarck (balança da justiça, âmbar da marca) |
