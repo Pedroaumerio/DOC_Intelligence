@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, test } from 'vitest'
 import { semearAcervo } from '../mocks/acervo'
 import { configurarDuble } from '../mocks/duble'
+import { escreverSessao, serializarSessao } from '../session/persistencia'
 import { enviarArquivoFalso, Provedores } from '../test/utils'
 import { Processados } from './Processados'
 
@@ -62,6 +63,28 @@ test('oferece "ver arquivo enviado" só para documento enviado nesta sessão', a
   await userEvent.click(within(linhasAcervo[0]!).getByRole('button'))
   expect(
     within(linhasAcervo[0]!).queryByRole('button', { name: /ver arquivo enviado/i }),
+  ).not.toBeInTheDocument()
+})
+
+test('reabre o arquivo depois de recarregar a aba, e "esquecer" apaga', async () => {
+  configurarDuble({ probFalha: 0 })
+  const doc = await enviarArquivoFalso('laudo-guardado.jpeg', 'image/jpeg')
+  // o que a sessão grava antes de a aba recarregar
+  escreverSessao(await serializarSessao([doc]))
+
+  // montagem nova sem semear a sessão → hidrata do sessionStorage
+  render(<Processados />, { wrapper: Provedores })
+
+  const nome = await screen.findByText('laudo-guardado.jpeg')
+  const linha = nome.closest('li')!
+  await userEvent.click(within(linha).getByRole('button'))
+  expect(
+    await within(linha).findByRole('button', { name: /ver arquivo enviado/i }),
+  ).toBeInTheDocument()
+
+  await userEvent.click(screen.getByRole('button', { name: /esquecer agora/i }))
+  expect(
+    within(linha).queryByRole('button', { name: /ver arquivo enviado/i }),
   ).not.toBeInTheDocument()
 })
 

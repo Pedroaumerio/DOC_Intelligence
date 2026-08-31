@@ -33,7 +33,9 @@ Uma página nova, **Processados**, separada de "Resultados":
 - `GET /documentos?pagina&tamanho&q&status` → `{ itens: DocumentoResumo[], pagina, tamanho, total, tem_proxima }` (ver [`contrato-api.md`](contrato-api.md)).
 - Um **acervo** de ~24 documentos fictícios "processados antes", semeado a cada
   carga (`src/mocks/acervo.ts`), determinístico. Os envios da sessão entram no
-  mesmo store. Nada persistido (fato d — os campos são PII).
+  mesmo store. Os campos extraídos não são persistidos (fato d — são PII); o
+  arquivo enviado na sessão fica em `sessionStorage` para a pessoa reabrir
+  (ADR-0001 §5).
 
 ## 4. Decisões
 

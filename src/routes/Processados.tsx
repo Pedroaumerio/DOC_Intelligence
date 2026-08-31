@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useDocumentos } from '../api/documentos'
 import { LinhaProcessado } from '../components/LinhaProcessado'
 import { useDebounce } from '../lib/useDebounce'
+import { useSessionDocumentos } from '../session/SessionDocumentos'
 import type { StatusDocumento } from '../types/contrato'
 import estilos from './Processados.module.css'
 
@@ -19,6 +20,8 @@ export function Processados() {
   const [q, setQ] = useState('')
   const [status, setStatus] = useState<StatusDocumento | ''>('')
   const [pagina, setPagina] = useState(1)
+
+  const { documentos: docsSessao, limpar: limparSessao } = useSessionDocumentos()
 
   const qBusca = useDebounce(q.trim(), 300)
 
@@ -38,6 +41,18 @@ export function Processados() {
         Todos os documentos já processados. Busque por nome do arquivo, titular,
         tipo ou qualquer campo lido. Clique num item para ver o resultado.
       </p>
+
+      {docsSessao.length > 0 && (
+        <p className={estilos.guardados}>
+          {docsSessao.length === 1
+            ? '1 arquivo que você enviou está guardado nesta aba'
+            : `${docsSessao.length} arquivos que você enviou estão guardados nesta aba`}{' '}
+          para reabrir — some ao fechar a aba.{' '}
+          <button type="button" className={estilos.esquecer} onClick={limparSessao}>
+            Esquecer agora
+          </button>
+        </p>
+      )}
 
       <div className={estilos.filtros}>
         <input

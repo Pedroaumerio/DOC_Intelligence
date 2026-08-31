@@ -56,7 +56,10 @@ npm run build      # typecheck + build de produção
 - O mock tem knobs para os testes: `configurarDuble({ latenciaMinMs, probFalha,
   probQuedaCampo, indiceDocumento })` e `definirIntervaloPoll(ms)`.
 - `src/mocks/acervo.ts` semeia ~24 documentos fictícios "processados antes" a
-  cada carga da página (determinístico). Nada é persistido — os campos são PII.
+  cada carga da página (determinístico). Os campos extraídos não são persistidos
+  (são PII). O arquivo enviado na sessão fica em `sessionStorage` — escopo da
+  aba, apagado ao fechar, com "Esquecer agora" em Processados (`src/session/
+  persistencia.ts`; ver ADR-0001 §5).
 - Commits: uma fatia coerente por commit, mensagem em português.
 
 ## Fora do escopo entregue

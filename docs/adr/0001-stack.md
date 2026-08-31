@@ -112,12 +112,24 @@ O enunciado diz que os fatos (a)–(g) não pedem funcionalidades. Vários deles
 | (a) 5–40 s, cobrado, falha às vezes | TanStack Query (polling, retry, backoff); MSW simulando latência e erro |
 | (b) foto torta, nome de arquivo lixo | Validação no cliente antes do envio; visualizador com zoom e rotação; o nome sugerido pelo serviço substitui o nome do arquivo |
 | (c) mesmo documento chega mais de uma vez | `crypto.subtle` (API nativa do browser) para hash SHA-256 antes do upload — evita pagar duas vezes pela mesma chamada. Sem dependência nova |
-| (d) dado pessoal sensível | Nenhuma telemetria de terceiro na stack; nada de PII em log; sem persistência do documento no browser |
+| (d) dado pessoal sensível | Nenhuma telemetria de terceiro na stack; nada de PII em log; o arquivo enviado fica só em `sessionStorage` (escopo da aba, apagado ao fechar), nunca em `localStorage` nem em servidor; os campos extraídos não são persistidos |
 | (e) 150/dia, pico de 800 entre 9h e 11h | Envio em lote com concorrência limitada; polling que pausa em aba sem foco |
 | (f) modelo e prompts vão mudar | Formulário gerado a partir do schema que vem da API, tipado em TypeScript. Campo novo numa identidade não exige deploy de front |
 | (g) duas conferentes ao mesmo tempo | `claim` no item ao abrir e tratamento de `409`; MSW simula o conflito para que isso seja testável |
 
 O fato (d) merece uma nota explícita: **cada dependência que entra no `package.json` de uma aplicação que exibe RG, contracheque e laudo é superfície de ataque e é um terceiro a auditar.** A stack acima tem sete dependências de runtime somadas. Isso é decisão de projeto, não economia.
+
+**Revisão (2026-08-31): o arquivo enviado passou a ser guardado em `sessionStorage`.**
+A decisão original era não persistir nada no browser. Na prática, quem envia um
+documento quer reabri-lo durante o expediente — conferir o que a máquina leu
+contra a foto — sem ter que procurar o arquivo de novo, e recarregar a aba
+apagava tudo. O meio-termo: o **arquivo original** (não os campos extraídos)
+fica em `sessionStorage`, que tem escopo de aba e é apagado quando a aba fecha —
+nunca em `localStorage`, que sobreviveria indefinidamente, nem em servidor. Há um
+botão "Esquecer agora" em "Processados" para apagar na hora. `sessionStorage`
+tem ~5 MB por origem: acima disso a gravação falha em silêncio e só a
+sobrevivência ao reload é perdida — a sessão em memória continua funcionando.
+Implementação isolada em [`src/session/persistencia.ts`](../../src/session/persistencia.ts).
 
 ---
 

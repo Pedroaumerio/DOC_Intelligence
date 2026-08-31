@@ -28,5 +28,6 @@ afterEach(() => {
   server.resetHandlers()
   resetarMock()
   cleanup()
+  sessionStorage.clear()
 })
 afterAll(() => server.close())

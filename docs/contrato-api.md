@@ -212,8 +212,10 @@ Para a lista de processados e a busca terem sobre o que operar, o mock semeia um
 da página: ~24 documentos "processados antes", com nomes de arquivo de celular,
 tipos e status variados, datas espalhadas nos últimos dias. É determinístico
 (PRNG com semente fixa — [`src/lib/prng.ts`](../src/lib/prng.ts)). Os envios da
-sessão se somam a ele. Nada é persistido: os campos são PII (fato d), então tudo
-some ao recarregar e o acervo é semeado de novo.
+sessão se somam a ele. Os **campos extraídos** não são persistidos: são PII
+(fato d), somem ao recarregar e o acervo é semeado de novo. O **arquivo original**
+enviado na sessão fica em `sessionStorage` (escopo da aba) para a pessoa reabrir
+— ver ADR-0001 §5.
 
 ---
 
