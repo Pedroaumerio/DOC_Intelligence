@@ -5,13 +5,21 @@ import { hashArquivo } from '../lib/hash'
 import { SessionDocumentosProvider, type DocumentoSessao } from '../session/SessionDocumentos'
 import type { RespostaEnvio } from '../types/contrato'
 
-export function Provedores({ children }: { children: ReactNode }) {
+export function Provedores({
+  children,
+  docsSessao,
+}: {
+  children: ReactNode
+  docsSessao?: DocumentoSessao[]
+}) {
   const [client] = useState(
     () => new QueryClient({ defaultOptions: { queries: { retry: false } } }),
   )
   return (
     <QueryClientProvider client={client}>
-      <SessionDocumentosProvider>{children}</SessionDocumentosProvider>
+      <SessionDocumentosProvider documentosIniciais={docsSessao}>
+        {children}
+      </SessionDocumentosProvider>
     </QueryClientProvider>
   )
 }

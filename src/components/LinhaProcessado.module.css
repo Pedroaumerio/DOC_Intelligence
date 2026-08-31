@@ -84,6 +84,21 @@
   border-top: 1px solid var(--linha);
 }
 
+.verArquivo {
+  margin-top: 12px;
+  background: transparent;
+  color: var(--acento);
+  border: 1px solid var(--acento);
+  border-radius: var(--raio-sm);
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.verArquivo:hover {
+  background: color-mix(in srgb, var(--acento) 12%, transparent);
+}
+
 .aviso,
 .falha {
   font-size: 0.9rem;

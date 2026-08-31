@@ -44,8 +44,15 @@ interface Contexto {
 
 const SessionContext = createContext<Contexto | null>(null)
 
-export function SessionDocumentosProvider({ children }: { children: ReactNode }) {
-  const [estado, dispatch] = useReducer(reducer, { lista: [] })
+export function SessionDocumentosProvider({
+  children,
+  documentosIniciais = [],
+}: {
+  children: ReactNode
+  /** Só para testes: semeia a sessão com documentos já enviados. */
+  documentosIniciais?: DocumentoSessao[]
+}) {
+  const [estado, dispatch] = useReducer(reducer, { lista: documentosIniciais })
 
   const registrar = useCallback(
     (doc: DocumentoSessao) => dispatch({ tipo: 'registrar', doc }),

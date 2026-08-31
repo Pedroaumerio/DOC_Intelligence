@@ -1,15 +1,23 @@
 import { useState } from 'react'
 import { useDocumento } from '../api/documentos'
 import { dataCurta, rotuloTipo } from '../lib/documento'
+import { useSessionDocumentos } from '../session/SessionDocumentos'
 import type { DocumentoResumo } from '../types/contrato'
 import { EsperaProcessando } from './EsperaProcessando'
 import { ResultadoLido } from './ResultadoLido'
 import { StatusBadge } from './StatusBadge'
+import { VisualizadorArquivo } from './VisualizadorArquivo'
 import estilos from './LinhaProcessado.module.css'
 
 /** Uma linha da lista de processados; clicar expande o resultado ali mesmo. */
 export function LinhaProcessado({ resumo }: { resumo: DocumentoResumo }) {
   const [aberto, setAberto] = useState(false)
+  const [vendoArquivo, setVendoArquivo] = useState(false)
+
+  // O arquivo original só existe para os documentos enviados nesta sessão (fica
+  // em memória, não é persistido — fato d). O acervo semeado não tem arquivo.
+  const { documentos } = useSessionDocumentos()
+  const daSessao = documentos.find((d) => d.id === resumo.id)
 
   return (
     <li className={estilos.linha} data-conferencia={resumo.status === 'aguardando_conferencia' || undefined}>
@@ -40,8 +48,25 @@ export function LinhaProcessado({ resumo }: { resumo: DocumentoResumo }) {
 
       {aberto && (
         <div className={estilos.detalhe}>
+          {daSessao && (
+            <button
+              type="button"
+              className={estilos.verArquivo}
+              onClick={() => setVendoArquivo(true)}
+            >
+              Ver arquivo enviado
+            </button>
+          )}
           <Detalhe id={resumo.id} nomeOriginal={resumo.nome_original} />
         </div>
+      )}
+
+      {vendoArquivo && daSessao && (
+        <VisualizadorArquivo
+          arquivo={daSessao.arquivo}
+          nome={daSessao.nomeOriginal}
+          onFechar={() => setVendoArquivo(false)}
+        />
       )}
     </li>
   )

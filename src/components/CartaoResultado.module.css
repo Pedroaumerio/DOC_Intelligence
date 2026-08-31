@@ -19,15 +19,6 @@
   border-bottom: 1px solid var(--linha);
 }
 
-.identificacao {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 4px;
-  min-width: 0;
-  max-width: 60%;
-}
-
 .original {
   font-family: var(--fonte-secundaria);
   font-size: 0.85rem;
@@ -35,19 +26,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 100%;
-}
-
-.verArquivo {
-  background: none;
-  border: none;
-  padding: 0;
-  font-family: var(--fonte-secundaria);
-  font-size: 0.8rem;
-  color: var(--acento);
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+  max-width: 60%;
 }
 
 .chips {

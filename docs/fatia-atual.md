@@ -34,7 +34,6 @@ Uma seção que mostra, por documento enviado nesta sessão, o que o processamen
 - **Campos extraídos**, no exemplo do enunciado para identidade: nome, filiação, data de nascimento, número e órgão emissor.
 - **Nome padronizado proposto** para o arquivo (ex.: `identidade_joao-da-silva_2026-08-30.pdf`), substituindo o nome original que veio do celular do atendimento.
 - **Indicador de confiança** por campo — sem isso, a próxima fatia (conferência humana) não tem o que mostrar.
-- **Ver arquivo enviado** — abre num modal o próprio arquivo que a pessoa mandou (o `File` fica em memória na sessão, não é persistido — fato d), para conferir o que a máquina leu sem ter que procurar o arquivo no dispositivo de novo. Imagem com girar (fato b — foto torta) e tamanho real; PDF no leitor do navegador. Não é o visualizador lado a lado com zoom de precisão — esse fica para a fatia da conferência.
 
 Enquanto o documento está em `processando`, a seção mostra um estado de espera claro (não um spinner genérico — a pessoa precisa saber que pode levar até 40 segundos e que a tela vai atualizar sozinha). Poll com TanStack Query, conforme já decidido na especificação.
 

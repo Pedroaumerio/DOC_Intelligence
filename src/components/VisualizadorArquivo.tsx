@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import estilos from './VisualizadorArquivo.module.css'
 
 /**
@@ -12,8 +12,8 @@ import estilos from './VisualizadorArquivo.module.css'
  * Outros formatos (ex.: HEIC, que a maioria dos navegadores não desenha):
  * mensagem honesta em vez de um quadro quebrado.
  *
- * O pai monta este componente só quando o modal deve aparecer e o desmonta ao
- * fechar — mais simples que sincronizar o atributo `open` do <dialog>.
+ * Overlay próprio (não `<dialog>`): mais previsível entre navegadores e não
+ * depende de `showModal()`, que sob o StrictMode pode falhar dentro de um efeito.
  */
 export function VisualizadorArquivo({
   arquivo,
@@ -24,40 +24,45 @@ export function VisualizadorArquivo({
   nome: string
   onFechar: () => void
 }) {
-  const ref = useRef<HTMLDialogElement>(null)
-  const [url, setUrl] = useState('')
+  // Object URL criada uma vez para este arquivo e revogada ao desmontar. O
+  // componente é montado do zero quando o modal abre, então init preguiçoso
+  // basta — sem setState em efeito.
+  const [url] = useState(() => URL.createObjectURL(arquivo))
   const [giro, setGiro] = useState(0)
   const [tamanhoReal, setTamanhoReal] = useState(false)
+  const [falhouImagem, setFalhouImagem] = useState(false)
 
-  // Object URL é um recurso do navegador com ciclo de vida próprio (criar /
-  // revogar) — sincronizar isso é exatamente o papel de um efeito, e o setState
-  // aqui roda uma vez por arquivo, não em cascata.
-  useEffect(() => {
-    const objectUrl = URL.createObjectURL(arquivo)
-    // oxlint-disable-next-line react/set-state-in-effect
-    setUrl(objectUrl)
-    return () => URL.revokeObjectURL(objectUrl)
-  }, [arquivo])
+  useEffect(() => () => URL.revokeObjectURL(url), [url])
 
   useEffect(() => {
-    const dlg = ref.current
-    dlg?.showModal()
-    return () => dlg?.close()
-  }, [])
+    const aoTeclar = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onFechar()
+    }
+    document.addEventListener('keydown', aoTeclar)
+    const overflowAntes = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', aoTeclar)
+      document.body.style.overflow = overflowAntes
+    }
+  }, [onFechar])
 
+  const ehHeic = /\.(heic|heif)$/i.test(nome) || /^image\/hei[cf]$/.test(arquivo.type)
   const ehImagem =
-    /^image\/(jpeg|png|webp|gif|avif|bmp)$/.test(arquivo.type) ||
-    (!arquivo.type && /\.(jpe?g|png|webp|gif|avif|bmp)$/i.test(nome))
+    !ehHeic &&
+    (/^image\//.test(arquivo.type) ||
+      (!arquivo.type && /\.(jpe?g|png|webp|gif|avif|bmp|svg)$/i.test(nome)))
   const ehPdf = arquivo.type === 'application/pdf' || /\.pdf$/i.test(nome)
+  const mostraImagem = ehImagem && !falhouImagem
 
   return (
-    <dialog
-      ref={ref}
-      className={estilos.dialogo}
+    <div
+      className={estilos.fundo}
+      role="dialog"
+      aria-modal="true"
       aria-label={`Arquivo enviado: ${nome}`}
-      onClose={onFechar}
       onClick={(e) => {
-        if (e.target === ref.current) onFechar()
+        if (e.target === e.currentTarget) onFechar()
       }}
     >
       <div className={estilos.painel}>
@@ -66,7 +71,7 @@ export function VisualizadorArquivo({
             {nome}
           </p>
           <div className={estilos.controles}>
-            {ehImagem && (
+            {mostraImagem && (
               <>
                 <button
                   type="button"
@@ -97,27 +102,28 @@ export function VisualizadorArquivo({
         </header>
 
         <div className={estilos.area} data-scroll={tamanhoReal || undefined}>
-          {url && ehImagem && (
+          {url && mostraImagem && (
             <img
               src={url}
               alt={`Arquivo enviado: ${nome}`}
               className={estilos.imagem}
               data-real={tamanhoReal || undefined}
               style={{ transform: `rotate(${giro}deg)` }}
+              onError={() => setFalhouImagem(true)}
             />
           )}
-          {url && !ehImagem && ehPdf && (
+          {url && !mostraImagem && ehPdf && (
             <iframe src={url} title={`Arquivo enviado: ${nome}`} className={estilos.pdf} />
           )}
-          {url && !ehImagem && !ehPdf && (
+          {url && !mostraImagem && !ehPdf && (
             <p className={estilos.semPreview}>
               Não dá para pré-visualizar <strong>{nome}</strong> aqui
               {arquivo.type ? ` (formato ${arquivo.type})` : ''}. O arquivo continua
-              guardado nesta sessão para reenvio.
+              guardado nesta sessão.
             </p>
           )}
         </div>
       </div>
-    </dialog>
+    </div>
   )
 }

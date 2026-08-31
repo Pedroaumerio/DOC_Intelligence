@@ -1,10 +1,8 @@
-import { useState } from 'react'
 import { useEnviarDocumento, useDocumento } from '../api/documentos'
 import { rotuloTipo } from '../lib/documento'
 import type { DocumentoSessao } from '../session/SessionDocumentos'
 import { EsperaProcessando } from './EsperaProcessando'
 import { ResultadoLido } from './ResultadoLido'
-import { VisualizadorArquivo } from './VisualizadorArquivo'
 import estilos from './CartaoResultado.module.css'
 
 /**
@@ -18,7 +16,6 @@ import estilos from './CartaoResultado.module.css'
 export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
   const { data, isPending, isError } = useDocumento(doc.id)
   const { mutate: reenviar, isPending: reenviando } = useEnviarDocumento()
-  const [vendoArquivo, setVendoArquivo] = useState(false)
 
   const recebidoEm =
     data && 'recebido_em' in data ? data.recebido_em : doc.enviadoEm
@@ -32,18 +29,9 @@ export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
   return (
     <article className={estilos.cartao} data-conferencia={emConferencia || undefined}>
       <header className={estilos.cabecalho}>
-        <div className={estilos.identificacao}>
-          <p className={estilos.original} title={doc.nomeOriginal}>
-            {doc.nomeOriginal}
-          </p>
-          <button
-            type="button"
-            className={estilos.verArquivo}
-            onClick={() => setVendoArquivo(true)}
-          >
-            Ver arquivo enviado
-          </button>
-        </div>
+        <p className={estilos.original} title={doc.nomeOriginal}>
+          {doc.nomeOriginal}
+        </p>
         {lido && (
           <span className={estilos.chips}>
             {emConferencia && (
@@ -83,14 +71,6 @@ export function CartaoResultado({ doc }: { doc: DocumentoSessao }) {
       )}
 
       {lido && <ResultadoLido data={lido} nomeOriginal={doc.nomeOriginal} />}
-
-      {vendoArquivo && (
-        <VisualizadorArquivo
-          arquivo={doc.arquivo}
-          nome={doc.nomeOriginal}
-          onFechar={() => setVendoArquivo(false)}
-        />
-      )}
     </article>
   )
 }
