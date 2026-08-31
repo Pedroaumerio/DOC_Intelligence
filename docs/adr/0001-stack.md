@@ -222,3 +222,13 @@ uma chamada nova. A segunda é um produto à parte, fora do contrato desta fatia
 antes de adotá-la, o próximo passo seria uma prova de conceito curta, limitando o
 Chroma a um conjunto piloto de documentos públicos do escritório e medindo a
 assertividade das respostas antes de abrir para documentos sensíveis.
+
+Ainda na proteção de dados sensíveis, é viável configurar mecanismos de
+contenção (*guardrails*) na camada da LLM: regras de sanitização e moderação
+que mascaram ou bloqueiam PII (CPF, nome, endereço) antes da geração da
+resposta — tanto no trecho recuperado que entra no prompt quanto no texto que
+volta ao usuário. É a defesa que complementa o controle de acesso do item (2)
+acima: o acesso decide *quem* pode perguntar sobre o quê; o *guardrail* decide
+*o que* pode aparecer na resposta, mesmo para quem tem acesso — por exemplo,
+devolver "consta um CPF cadastrado" em vez do número em si, a menos que a
+pessoa tenha permissão explícita para vê-lo.
