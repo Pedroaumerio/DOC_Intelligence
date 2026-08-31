@@ -160,3 +160,65 @@ Onde isso encosta nos fatos do ambiente:
 No contrato, isso significaria `GET /documentos` ganhar um recorte por profissional
 **no servidor** (não um filtro do cliente, que ainda traria os dados na resposta)
 e o documento passar a carregar o profissional responsável.
+
+### Busca vetorizada e RAG interno (Chroma + Hugging Face + Groq)
+
+Outra ideia foi usar uma base vetorial local (Chroma, trychroma.com) com modelos
+abertos de embedding (Hugging Face — ex.: `sentence-transformers`, `bge-m3`) para
+indexar conteúdo por similaridade semântica, com duas aplicações possíveis.
+
+A primeira, mais próxima do que esta entrega já faz: detectar **quase-duplicatas**
+entre os documentos processados — o mesmo documento fotografado de novo, um pouco
+recortado ou com iluminação diferente, que hoje passa pela deduplicação por hash
+(SHA-256, só pega arquivo idêntico byte a byte) e vira uma nova chamada paga ao
+fornecedor — e, quando a similaridade for alta o suficiente, evitar (ou pelo
+menos sinalizar antes de) uma nova chamada de classificação/extração para o
+modelo multimodal pago por documento.
+
+A segunda é maior: um fluxo de **RAG (Retrieval-Augmented Generation)** para
+permitir perguntas em linguagem natural sobre o acervo documental do escritório
+— não só os documentos processados por esta fatia, mas manuais, relatórios,
+contratos e históricos internos. O Chroma recuperaria só os 3 a 5 trechos mais
+relevantes para a pergunta, e só esses trechos (não o acervo inteiro) seguiriam
+para a Groq (console.groq.com) — que não indexa nada, só sintetiza a resposta
+final a partir do que foi recuperado, aproveitando a inferência rápida e barata
+das LPUs da Groq para devolver uma resposta quase em tempo real, citando a
+origem. Essa segunda aplicação é uma expansão do produto, não faz parte da
+triagem de documentos de cliente que o enunciado pede nesta entrega.
+
+A funcionalidade não avançou nesta etapa por um conjunto de motivos: (1) divisão
+de stack de IA — a Groq não disponibiliza endpoint nativo de embeddings, então a
+vetorização precisaria rodar à parte, localmente; (2) governança — antes de
+indexar o acervo interno do escritório (aplicação 2) é preciso definir controle
+de acesso, para evitar que um colaborador consulte documento confidencial de
+outro cliente ou setor via busca semântica — o mesmo problema que motivou a
+ideia de login individual, logo acima; (3) superfície de dependências — banco
+vetorial e pesos de modelo local contrariam, por ora, o princípio de dependência
+mínima do fato (d) que guiou a stack atual (§5); e (4) escopo e prazo — o
+enunciado desta entrega pede a triagem de documentos de cliente, não uma base de
+conhecimento interna do escritório.
+
+Onde isso encosta nos fatos do ambiente:
+
+- **Fato (a)** — cada chamada ao fornecedor é paga; detectar quase-duplicata
+  antes de reprocessar economiza uma chamada inteira, e a Groq tem custo por
+  chamada bem menor que o do fornecedor multimodal para a etapa de resposta.
+- **Fato (c)** — hoje a deduplicação só pega arquivo idêntico byte a byte; a
+  busca vetorial pegaria o mesmo documento reenviado com uma foto diferente, que
+  o hash não identifica como duplicata.
+- **Fato (d)** — rodando o modelo de embedding e o Chroma dentro do próprio
+  ambiente do escritório, sem chamar um serviço de terceiro para vetorizar, o
+  conteúdo bruto nunca sai da aplicação; na aplicação de RAG, só os poucos
+  trechos recuperados (não o acervo inteiro) chegam à Groq. O cuidado que sobra
+  é outro: os vetores derivados de campos como CPF e nome também são dado
+  derivado de PII e precisam do mesmo tratamento de acesso e retenção que os
+  campos originais.
+
+No contrato, a primeira aplicação significaria uma etapa extra antes do
+`POST /documentos` seguir pro fornecedor: comparar o novo documento contra a base
+vetorial e, se a similaridade passar de um limiar, devolver o resultado do
+documento parecido como sugestão, deixando a pessoa confirmar em vez de esperar
+uma chamada nova. A segunda é um produto à parte, fora do contrato desta fatia;
+antes de adotá-la, o próximo passo seria uma prova de conceito curta, limitando o
+Chroma a um conjunto piloto de documentos públicos do escritório e medindo a
+assertividade das respostas antes de abrir para documentos sensíveis.
