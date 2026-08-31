@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, expect, test } from 'vitest'
 import { configurarDuble } from '../mocks/duble'
@@ -63,6 +63,31 @@ test('confiança baixa segura o documento para conferência humana', async () =>
   // e há o botão de conferir/corrigir
   expect(
     screen.getByRole('button', { name: /conferir e corrigir/i }),
+  ).toBeInTheDocument()
+})
+
+test('dá para abrir o arquivo enviado, inclusive durante a conferência', async () => {
+  configurarDuble({ indiceDocumento: 0, probQuedaCampo: 1 })
+  const doc = await enviarArquivoFalso('rg.jpeg', 'image/jpeg')
+  render(<CartaoResultado doc={doc} />, { wrapper: Provedores })
+
+  await screen.findByText('Aguardando conferência')
+  await userEvent.click(
+    screen.getByRole('button', { name: /ver arquivo enviado/i }),
+  )
+
+  const dialogo = await screen.findByRole('dialog')
+  expect(
+    within(dialogo).getByRole('img', { name: /arquivo enviado/i }),
+  ).toBeInTheDocument()
+  await userEvent.click(within(dialogo).getByRole('button', { name: /fechar/i }))
+
+  // segue acessível depois de abrir o formulário de correção
+  await userEvent.click(
+    screen.getByRole('button', { name: /conferir e corrigir/i }),
+  )
+  expect(
+    screen.getByRole('button', { name: /ver arquivo enviado/i }),
   ).toBeInTheDocument()
 })
 
