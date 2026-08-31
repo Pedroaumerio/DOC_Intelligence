@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { AvisoArquivosGuardados } from '../components/AvisoArquivosGuardados'
 import { CartaoResultado } from '../components/CartaoResultado'
 import { useSessionDocumentos } from '../session/SessionDocumentos'
 import estilos from './SecaoResultado.module.css'
@@ -13,6 +14,8 @@ export function SecaoResultado() {
         O que o processamento devolveu para os documentos enviados nesta sessão.
         Cada cartão atualiza sozinho quando o resultado fica pronto.
       </p>
+
+      <AvisoArquivosGuardados />
 
       {documentos.length === 0 ? (
         <div className={estilos.vazio}>
