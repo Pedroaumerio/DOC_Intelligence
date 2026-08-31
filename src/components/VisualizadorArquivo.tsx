@@ -24,15 +24,21 @@ export function VisualizadorArquivo({
   nome: string
   onFechar: () => void
 }) {
-  // Object URL criada uma vez para este arquivo e revogada ao desmontar. O
-  // componente é montado do zero quando o modal abre, então init preguiçoso
-  // basta — sem setState em efeito.
-  const [url] = useState(() => URL.createObjectURL(arquivo))
+  const [url, setUrl] = useState('')
   const [giro, setGiro] = useState(0)
   const [tamanhoReal, setTamanhoReal] = useState(false)
   const [falhouImagem, setFalhouImagem] = useState(false)
 
-  useEffect(() => () => URL.revokeObjectURL(url), [url])
+  // Object URL é um recurso do navegador com ciclo de vida próprio: criar aqui e
+  // revogar na limpeza é o padrão da doc do React para este caso. Criar via
+  // init de useState quebraria sob o StrictMode — a limpeza do "desmonte" falso
+  // revoga a URL, mas o estado continua apontando para ela.
+  useEffect(() => {
+    const objectUrl = URL.createObjectURL(arquivo)
+    // oxlint-disable-next-line react/set-state-in-effect
+    setUrl(objectUrl)
+    return () => URL.revokeObjectURL(objectUrl)
+  }, [arquivo])
 
   useEffect(() => {
     const aoTeclar = (e: KeyboardEvent) => {
