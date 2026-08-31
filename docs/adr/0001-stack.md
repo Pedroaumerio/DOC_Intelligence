@@ -201,7 +201,7 @@ conhecimento interna do escritório.
 Onde isso encosta nos fatos do ambiente:
 
 - **Fato (a)** — cada chamada ao fornecedor é paga; detectar quase-duplicata
-  antes de reprocessar economiza uma chamada inteira, e a Groq tem custo por
+  antes de reprocessar economiza uma chamada inteira, e a Groq pode ter um custo por
   chamada bem menor que o do fornecedor multimodal para a etapa de resposta.
 - **Fato (c)** — hoje a deduplicação só pega arquivo idêntico byte a byte; a
   busca vetorial pegaria o mesmo documento reenviado com uma foto diferente, que
