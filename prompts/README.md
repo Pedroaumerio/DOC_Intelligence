@@ -8,19 +8,20 @@ Inclui as mensagens de git ("faça o commit", "de o push") e as perguntas.
 
 No pedido "implemente algo que consiga ler as imagens" (`09`), o agente construiu
 um leitor de OCR de verdade no navegador (Tesseract.js em WebAssembly, com
-pré-processamento de imagem e heurísticas de extração de campos) em vez de manter
-a leitura como mock. Percebi o problema entrando na parte do código onde a lógica
-de leitura estava sendo criada (`src/mocks/`) e relendo o enunciado: ele é
-explícito em que o "dublê" do fornecedor é uma função dentro do mock que devolve
-**dados fictícios**, e que "não há integração com nenhum serviço externo nesta
-fatia" — restrição que a ADR-0001 já tinha fixado antes desse pedido. Um OCR
-local não é literalmente um serviço externo, mas é peso e complexidade que a
-fatia vertical não precisa carregar, e joga contra o fato (d) do ambiente (cada
-dependência num app que exibe RG e contracheque é superfície de ataque).
-Encontrei o problema, avaliei a solução, e a decisão foi **seguir o que o desafio
-pede**: reverter a leitura para o dublê com dados fictícios (`src/mocks/duble.ts`),
-como estava antes, e registrar a regra de forma explícita no `CLAUDE.md` ("não há
-OCR nem serviço externo") para o mesmo desvio não se repetir nos próximos pedidos.
+pré-processamento de imagem e heurísticas de extração de campos), sem checar
+antes se isso contrariava uma restrição que já estava fixada: a ADR-0001, escrita
+antes desse pedido, já dizia que não haveria integração com nenhum serviço
+externo nesta fatia, e que o "dublê" do fornecedor deveria continuar sendo uma
+função de mock com dados fictícios. Na prática, o OCR também não funcionou bem —
+a leitura saía errada, com texto ilegível no lugar dos campos esperados
+(`prompts/10.md`–`14.md`) —, e foi esse problema técnico que me fez pedir para
+reverter. Um OCR local não é literalmente um serviço externo, e pode até fazer
+sentido numa evolução futura do produto, fora do escopo desta entrega, mas o erro
+do agente foi ter implementado algo que já contrariava uma decisão de arquitetura
+registrada, sem levantar esse conflito antes de começar. A leitura voltou a ser o
+dublê com dados fictícios (`src/mocks/duble.ts`), como estava antes, e a regra
+passou a estar registrada de forma explícita no `CLAUDE.md` ("não há OCR nem
+serviço externo") para o mesmo desvio não se repetir.
 
 ## Fidelidade
 
